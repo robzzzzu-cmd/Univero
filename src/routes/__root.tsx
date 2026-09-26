@@ -8,6 +8,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { ArrowRight, Bookmark, GitCompareArrows } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -77,14 +79,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
@@ -92,6 +86,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: appCss,
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" },
     ],
   }),
   shellComponent: RootShell,
@@ -119,8 +116,21 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+      <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-md">
+        <div className="page-shell flex h-[72px] items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2.5 font-display text-xl font-bold text-ink"><span className="flex size-8 items-center justify-center rounded-md bg-primary text-lg font-bold text-primary-foreground">u.</span> univero<span className="text-primary">.</span></Link>
+          <nav className="hidden items-center gap-8 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
+            <Link to="/results" className="hover:text-primary">Explore matches</Link><Link to="/compare" className="hover:text-primary">Compare</Link><Link to="/shortlist" className="hover:text-primary">My shortlist</Link>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" asChild className="md:hidden" title="Shortlist"><Link to="/shortlist"><Bookmark /></Link></Button>
+            <Button variant="ghost" size="icon" asChild className="md:hidden" title="Compare"><Link to="/compare"><GitCompareArrows /></Link></Button>
+            <Button size="sm" asChild><Link to="/profile">Find my matches <ArrowRight /></Link></Button>
+          </div>
+        </div>
+      </header>
       <Outlet />
+      <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><span className="font-display text-lg font-bold text-ink">univero<span className="text-primary">.</span></span><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Prototype data</span></div></footer>
     </QueryClientProvider>
   );
 }
