@@ -1,24 +1,37 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowRight, ArrowUpRight, Check, Compass, GraduationCap, ShieldCheck, Wallet } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import campus from "@/assets/campus-hero.jpg";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({ meta: [{ title: "Univero — Find the universities that fit you" }, { name: "description", content: "One profile. A clearer path to universities that fit your grades, budget, and ambitions." }, { property: "og:title", content: "Univero — Find the universities that fit you" }, { property: "og:description", content: "Discover universities where you meet the requirements, understand the costs, and see why each one fits." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const stepsData: { n: string; title: string; text: string; Icon: typeof GraduationCap }[] = [
+  { n: "01", title: "Tell us about yourself", text: "Share your academics, interests, preferred places and tuition budget.", Icon: GraduationCap },
+  { n: "02", title: "We connect the dots", text: "We check key requirements and weigh academic, program, cost and personal fit.", Icon: Compass },
+  { n: "03", title: "Build your shortlist", text: "Explore your matches, understand the reasons and compare your options.", Icon: ShieldCheck },
+];
+const factorsData: { Icon: typeof GraduationCap; title: string; text: string }[] = [
+  { Icon: ShieldCheck, title: "Eligibility", text: "Requirements checked" },
+  { Icon: GraduationCap, title: "Academic fit", text: "A realistic academic picture" },
+  { Icon: Wallet, title: "Affordability", text: "Costs in context" },
+  { Icon: Compass, title: "Personal fit", text: "A place that feels right" },
+];
+
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  return <main>
+    <section className="relative min-h-[650px] overflow-hidden bg-ink text-primary-foreground md:min-h-[680px]">
+      <img src={campus} alt="Students walking through a European university courtyard" width={1600} height={1104} className="absolute inset-0 size-full object-cover object-center opacity-55" />
+      <div className="absolute inset-0 bg-gradient-to-r from-ink/95 via-ink/70 to-ink/10" />
+      <div className="page-shell relative flex min-h-[650px] flex-col justify-center py-20 md:min-h-[680px]">
+        <div className="max-w-[700px]"><span className="inline-flex items-center gap-2 rounded-sm border border-primary-foreground/30 px-3 py-1.5 text-xs font-bold uppercase text-primary-foreground">A clearer path to your future <ArrowUpRight className="size-3" /></span><h1 className="mt-7 font-display text-4xl font-bold leading-[1.13] text-primary-foreground sm:text-5xl lg:text-[64px]">Find the universities<br />that fit <span className="text-soft-blue">you.</span></h1><p className="mt-6 max-w-[580px] text-base leading-8 text-primary-foreground/90 md:text-lg">Enter your grades, test scores, budget and preferences. We’ll match you with universities where you meet the requirements and are most likely to thrive.</p><div className="mt-9 flex flex-wrap gap-3"><Button size="lg" asChild className="bg-card text-ink hover:bg-secondary"><Link to="/profile">Find my matches <ArrowRight /></Link></Button><Button size="lg" variant="outline" asChild className="border-primary-foreground/50 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"><a href="#how-it-works">See how it works</a></Button></div><p className="mt-8 flex items-center gap-2 text-xs text-primary-foreground/80"><Check className="size-4" /> No guesswork. Just clearer choices.</p></div>
+      </div>
+    </section>
+    <section className="page-shell relative -mt-12 z-10 pb-24"><div className="grid gap-4 rounded-lg border border-border bg-card p-5 subtle-shadow md:grid-cols-3 md:p-7"><div className="border-b border-border pb-4 md:border-b-0 md:border-r md:pb-0"><span className="text-xs font-bold uppercase text-primary">01 / Your profile</span><p className="mt-2 font-display text-lg font-semibold text-ink">More than your grades.</p><p className="mt-1 text-sm text-muted-foreground">Your goals, budget and preferences count too.</p></div><div className="border-b border-border pb-4 md:border-b-0 md:border-r md:pb-0"><span className="text-xs font-bold uppercase text-primary">02 / Real clarity</span><p className="mt-2 font-display text-lg font-semibold text-ink">Know where you stand.</p><p className="mt-1 text-sm text-muted-foreground">See eligibility, competitiveness and cost separately.</p></div><div><span className="text-xs font-bold uppercase text-primary">03 / Your next step</span><p className="mt-2 font-display text-lg font-semibold text-ink">A shortlist that makes sense.</p><p className="mt-1 text-sm text-muted-foreground">Compare options and move forward confidently.</p></div></div></section>
+    <section id="how-it-works" className="page-shell py-8 md:py-16"><div className="grid items-end gap-4 md:grid-cols-2"><div><p className="text-xs font-bold uppercase text-primary">How Univero works</p><h2 className="mt-3 max-w-lg font-display text-3xl font-bold leading-tight text-ink md:text-4xl">From overwhelmed to on your way.</h2></div><p className="max-w-md text-muted-foreground md:justify-self-end">One simple profile becomes a thoughtful list of universities you can actually explore.</p></div><div className="mt-12 grid gap-8 md:grid-cols-3">{stepsData.map(({ n, title, text, Icon }) => <div key={n} className="border-t border-border pt-6"><div className="flex items-center justify-between"><span className="font-display text-sm font-bold text-primary">{n}</span><Icon className="size-7 text-primary" /></div><h3 className="mt-7 font-display text-xl font-bold text-ink">{title}</h3><p className="mt-3 text-sm leading-7 text-muted-foreground">{text}</p></div>)}</div></section>
+    <section className="mt-20 bg-secondary/60 py-20"><div className="page-shell grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-center"><div><p className="text-xs font-bold uppercase text-primary">A match with meaning</p><h2 className="mt-3 font-display text-3xl font-bold leading-tight text-ink md:text-4xl">Not just a score.<br />The whole picture.</h2><p className="mt-5 leading-7 text-muted-foreground">A university can look perfect on paper. We help you understand if it makes sense for you academically, financially and personally.</p><Button asChild className="mt-7"><Link to="/profile">Explore your matches <ArrowRight /></Link></Button></div><div className="rounded-lg border border-border bg-card p-6 subtle-shadow md:p-8"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase text-primary">Sample match</p><h3 className="mt-2 font-display text-xl font-bold text-ink">Erasmus University Rotterdam</h3><p className="mt-1 text-sm text-muted-foreground">International Business Administration · Netherlands</p></div><div className="text-right"><span className="font-display text-3xl font-bold text-primary">94%</span><span className="block text-xs font-bold uppercase text-muted-foreground">match score</span></div></div><div className="my-6 h-px bg-border" /><div className="grid gap-4 sm:grid-cols-2">{factorsData.map(({ Icon, title, text }) => <div key={title} className="flex items-start gap-3"><span className="rounded-md bg-accent p-2 text-primary"><Icon className="size-4" /></span><div><p className="text-sm font-bold text-ink">{title}</p><p className="mt-1 text-xs text-muted-foreground">{text}</p></div></div>)}</div><p className="mt-6 border-t border-border pt-4 text-xs text-muted-foreground">Illustrative example. Scores indicate fit, not admission probability.</p></div></div></section>
+    <section className="page-shell py-20 text-center"><h2 className="font-display text-3xl font-bold text-ink md:text-4xl">Your future starts with a better question.</h2><p className="mx-auto mt-4 max-w-xl text-muted-foreground">Not “what’s the best university?” but “what’s the right university for me?”</p><Button size="lg" asChild className="mt-8"><Link to="/profile">Find my matches <ArrowRight /></Link></Button></section>
+  </main>;
 }

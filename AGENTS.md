@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Univero's prototype uses client-side local storage for profile, shortlist, comparison, and application statuses because the supplied hackathon brief explicitly requests frontend-only interactions.
+- University catalog and transparent weighted scoring live in a shared client-safe module so every results, detail, and comparison view uses identical demo data.
