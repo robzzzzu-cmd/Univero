@@ -10,12 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CompareRouteImport } from './routes/compare'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResultsRouteImport } from './routes/results'
+import { Route as ShortlistRouteImport } from './routes/shortlist'
+import { Route as UniversityIdRouteImport } from './routes/university.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -28,35 +36,76 @@ const ResultsRoute = ResultsRouteImport.update({
   path: '/results',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShortlistRoute = ShortlistRouteImport.update({
+  id: '/shortlist',
+  path: '/shortlist',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UniversityIdRoute = UniversityIdRouteImport.update({
+  id: '/university/$id',
+  path: '/university/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/compare': typeof CompareRoute
   '/profile': typeof ProfileRoute
   '/results': typeof ResultsRoute
+  '/shortlist': typeof ShortlistRoute
+  '/university/$id': typeof UniversityIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/compare': typeof CompareRoute
   '/profile': typeof ProfileRoute
   '/results': typeof ResultsRoute
+  '/shortlist': typeof ShortlistRoute
+  '/university/$id': typeof UniversityIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/compare': typeof CompareRoute
   '/profile': typeof ProfileRoute
   '/results': typeof ResultsRoute
+  '/shortlist': typeof ShortlistRoute
+  '/university/$id': typeof UniversityIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/profile' | '/results'
+  fullPaths:
+    | '/'
+    | '/compare'
+    | '/profile'
+    | '/results'
+    | '/shortlist'
+    | '/university/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/profile' | '/results'
-  id: '__root__' | '/' | '/profile' | '/results'
+  to:
+    | '/'
+    | '/compare'
+    | '/profile'
+    | '/results'
+    | '/shortlist'
+    | '/university/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/compare'
+    | '/profile'
+    | '/results'
+    | '/shortlist'
+    | '/university/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CompareRoute: typeof CompareRoute
   ProfileRoute: typeof ProfileRoute
   ResultsRoute: typeof ResultsRoute
+  ShortlistRoute: typeof ShortlistRoute
+  UniversityIdRoute: typeof UniversityIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -82,13 +138,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shortlist': {
+      id: '/shortlist'
+      path: '/shortlist'
+      fullPath: '/shortlist'
+      preLoaderRoute: typeof ShortlistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/university/$id': {
+      id: '/university/$id'
+      path: '/university/$id'
+      fullPath: '/university/$id'
+      preLoaderRoute: typeof UniversityIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CompareRoute: CompareRoute,
   ProfileRoute: ProfileRoute,
   ResultsRoute: ResultsRoute,
+  ShortlistRoute: ShortlistRoute,
+  UniversityIdRoute: UniversityIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
