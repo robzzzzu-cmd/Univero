@@ -1,3 +1,3 @@
-- [ ] Apply uploaded Univero logo across header/footer and favicon
-- [ ] Apply brand palette (Whispy Blue, Blood Red, Buttercream) throughout site
-- [ ] Verify desktop/mobile branding and build health
+- [x] Apply uploaded Univero logo across header/footer and favicon
+- [x] Apply brand palette (Whispy Blue, Blood Red, Buttercream) throughout site
+- [x] Verify desktop/mobile branding and build health
