@@ -1,12 +1,41 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AdmissionPill, Card, EligibilityPill, meta, PageHeader, UniLogo } from "@/components/univero/bits";
+import { getMatch, money, universities } from "@/lib/univero";
 import { useUnivero } from "@/lib/use-univero";
-import { universities, getMatch, money, type University } from "@/lib/univero";
 
-export const Route = createFileRoute("/compare")({ head: () => ({ meta: [{ title: "Compare universities — Univero" }, { name: "description", content: "Compare up to three university programs by fit, eligibility, tuition, requirements and more." }, { property: "og:title", content: "Compare universities — Univero" }, { property: "og:description", content: "See the differences between your university matches side by side." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: Compare });
+export const Route = createFileRoute("/compare")({ head: () => meta("Compare universities — Univero", "Compare 2–4 universities side by side: match, eligibility, costs, scholarships, deadlines and fit."), component: Compare });
+
+type Row = { label: string; values: (string | number)[]; best?: "high" | "low"; raw?: number[]; node?: (i: number) => React.ReactNode };
 function Compare() {
-  const { profile, compare, ready, toggleCompare } = useUnivero(); const selected = compare.map(id => universities.find(u => u.id === id)).filter((u): u is University => Boolean(u));
-  const rows: [string, (u: University) => string][] = [["Match score", u => `${getMatch(u, profile).score}%`], ["Eligibility", u => getMatch(u, profile).eligibility], ["Competitiveness", u => u.competitiveness], ["Country", u => u.country], ["City", u => u.city], ["Program", u => u.program], ["Tuition / year*", u => money(u.tuition)], ["Living costs / year*", u => `~${money(u.living)}`], ["Scholarships", u => u.scholarship ? "May be available" : "Not listed"], ["Language", u => u.language], ["Indicative GPA", u => `${u.minGpa}+`], ["Indicative SAT", u => `${u.sat}+`], ["Indicative IELTS", u => `${u.ielts}+`], ["Mathematics", u => u.math ? "Expected" : "Not required"], ["Career opportunities", u => u.career], ["Student population", u => u.students], ["Setting", u => u.setting], ["Personal fit", u => u.tags.slice(0, 2).join(", ")]];
-  return <main className="page-shell min-h-[70vh] py-12 md:py-16"><p className="text-xs font-bold uppercase text-primary">Side by side</p><h1 className="mt-3 font-display text-3xl font-bold text-ink md:text-4xl">Compare universities</h1><p className="mt-3 text-muted-foreground">The details that matter, all in one place. Compare up to three options.</p>{ready && !selected.length ? <div className="mt-12 rounded-lg border border-border bg-card px-6 py-16 text-center"><h2 className="font-display text-xl font-bold text-ink">Your comparison is empty</h2><p className="mt-2 text-sm text-muted-foreground">Add universities from your matches to see them side by side.</p><Button asChild className="mt-6"><Link to="/results">Explore matches <ArrowRight /></Link></Button></div> : <><div className="mt-9 overflow-x-auto rounded-lg border border-border bg-card"><table className="w-full min-w-[640px] border-collapse text-left text-sm"><thead><tr className="bg-secondary/60"><th className="w-[180px] p-4 align-top text-xs uppercase text-muted-foreground">Compare</th>{selected.map(u => <th key={u.id} className="min-w-[200px] p-4 align-top"><div className="flex justify-between gap-2"><Link to="/university/$id" params={{ id: u.id }} className="font-display text-base font-bold text-ink hover:text-primary">{u.name}</Link><Button size="icon" variant="ghost" title={`Remove ${u.name}`} onClick={() => toggleCompare(u.id)} className="size-7 shrink-0"><X /></Button></div><p className="mt-1 text-xs font-normal text-muted-foreground">{u.city}, {u.country}</p></th>)}</tr></thead><tbody>{rows.map(([label, value], i) => <tr key={label} className={i % 2 ? "bg-muted/40" : ""}><th className="border-t border-border p-4 text-xs font-semibold text-muted-foreground">{label}</th>{selected.map(u => <td key={u.id} className={`border-t border-border p-4 ${i === 0 ? "font-display text-2xl font-bold text-primary" : "text-foreground"}`}>{value(u)}</td>)}</tr>)}</tbody></table></div><div className="mt-6 flex flex-wrap items-center justify-between gap-4"><p className="text-xs text-muted-foreground">*Illustrative prototype data. Confirm figures and requirements with universities.</p><Button variant="outline" asChild><Link to="/results">{selected.length < 3 ? "Add more universities" : "Back to matches"} <ArrowRight /></Link></Button></div></>}</main>;
+  const { profile, compare, saved, ready, toggleCompare } = useUnivero();
+  const items = compare.map(id => universities.find(u => u.id === id)).filter((u): u is NonNullable<typeof u> => !!u);
+  const ms = items.map(u => getMatch(u, profile));
+  const suggestions = universities.filter(u => !compare.includes(u.id)).sort((a, b) => Number(saved.includes(b.id)) - Number(saved.includes(a.id)) || a.name.localeCompare(b.name));
+  const rows: Row[] = [
+    { label: "Match Score", values: ms.map(m => `${m.score}%`), raw: ms.map(m => m.score), best: "high" },
+    { label: "Eligibility", values: ms.map(m => m.eligibility), node: i => <EligibilityPill value={ms[i].eligibility} /> },
+    { label: "Admission outlook", values: ms.map(m => m.admission), node: i => <AdmissionPill value={ms[i].admission} /> },
+    { label: "Program", values: ms.map(m => m.program.name) },
+    { label: "Tuition / year*", values: ms.map(m => money(m.tuition)), raw: ms.map(m => m.tuition), best: "low" },
+    { label: "Living costs / year*", values: items.map(u => money(u.living)), raw: items.map(u => u.living), best: "low" },
+    { label: "Scholarships", values: items.map(u => (u.scholarships.length ? `${u.scholarships.length} listed` : "None listed")), raw: items.map(u => u.scholarships.length), best: "high" },
+    { label: "Deadline*", values: items.map(u => u.deadline) },
+    { label: "Language", values: ms.map(m => m.program.language) },
+    { label: "Duration", values: ms.map(m => m.program.duration) },
+    { label: "University size", values: items.map(u => `${u.students} students`) },
+    { label: "City", values: items.map(u => `${u.flag} ${u.city}`) },
+    { label: "Academic fit", values: ms.map(m => `${m.fit.academic}/10`), raw: ms.map(m => m.fit.academic), best: "high" },
+    { label: "Career fit", values: ms.map(m => `${m.fit.career}/10`), raw: ms.map(m => m.fit.career), best: "high" },
+    { label: "Personal fit", values: ms.map(m => `${m.fit.personal}/10`), raw: ms.map(m => m.fit.personal), best: "high" },
+  ];
+  const bestIdx = (r: Row) => { if (!r.raw || !r.best || items.length < 2) return -1; const target = r.best === "high" ? Math.max(...r.raw) : Math.min(...r.raw); return r.raw.filter(v => v === target).length === r.raw.length ? -1 : r.raw.indexOf(target); };
+  return <main className="page-shell min-h-[70vh] py-12 md:py-16">
+    <PageHeader eyebrow="Side by side" title="Compare universities" subtitle="Choose 2–4 universities. The strongest value in each row is highlighted.">{compare.length < 4 && <label className="flex items-center gap-2"><Plus className="size-4 text-primary" /><select aria-label="Add university" value="" onChange={e => e.target.value && toggleCompare(e.target.value)} className="h-10 rounded-md border border-border bg-card px-3 text-sm font-semibold"><option value="">Add a university…</option>{suggestions.map(u => <option key={u.id} value={u.id}>{saved.includes(u.id) ? "★ " : ""}{u.name}</option>)}</select></label>}</PageHeader>
+    {ready && items.length < 2 && <Card className="mt-9 text-center !py-12"><h2 className="font-display text-xl font-bold">Add {items.length ? "one more university" : "at least two universities"}</h2><p className="mt-2 text-sm text-muted-foreground">Use “Compare” on any match, or pick from the list above.</p><Button asChild className="mt-5"><Link to="/results">Browse matches <ArrowRight /></Link></Button></Card>}
+    {ready && items.length > 0 && <div className="mt-9 overflow-x-auto rounded-lg border border-border bg-card"><table className="w-full min-w-[720px] text-sm"><thead><tr><th className="w-44 p-4" />{items.map(u => <th key={u.id} className="p-4 text-left align-top"><div className="flex items-start justify-between gap-2"><UniLogo university={u} size="sm" /><button onClick={() => toggleCompare(u.id)} aria-label={`Remove ${u.name}`} className="text-muted-foreground hover:text-primary"><X className="size-4" /></button></div><Link to="/university/$id" params={{ id: u.id }} className="mt-3 block font-display font-bold text-ink hover:text-primary">{u.name}</Link></th>)}</tr></thead>
+      <tbody>{rows.map(r => { const b = bestIdx(r); return <tr key={r.label} className="border-t border-border"><th className="p-4 text-left text-xs font-bold uppercase text-muted-foreground">{r.label}</th>{r.values.map((v, i) => <td key={i} className={`p-4 ${i === b ? "bg-success-soft font-bold text-success" : "text-ink"}`}>{r.node ? r.node(i) : v}</td>)}</tr>; })}</tbody></table></div>}
+    <p className="mt-4 text-xs text-muted-foreground">*Illustrative prototype data. Confirm details with each university.</p>
+  </main>;
 }
