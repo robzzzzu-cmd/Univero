@@ -16,6 +16,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ShortlistRouteImport } from './routes/shortlist'
 import { Route as UniversityIdRouteImport } from './routes/university.$id'
@@ -55,6 +56,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResultsRoute = ResultsRouteImport.update({
   id: '/results',
   path: '/results',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
   '/results': typeof ResultsRoute
   '/shortlist': typeof ShortlistRoute
   '/university/$id': typeof UniversityIdRoute
@@ -91,6 +98,7 @@ export interface FileRoutesByTo {
   '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
   '/results': typeof ResultsRoute
   '/shortlist': typeof ShortlistRoute
   '/university/$id': typeof UniversityIdRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
   '/results': typeof ResultsRoute
   '/shortlist': typeof ShortlistRoute
   '/university/$id': typeof UniversityIdRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/explore'
     | '/onboarding'
+    | '/profile'
     | '/results'
     | '/shortlist'
     | '/university/$id'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/explore'
     | '/onboarding'
+    | '/profile'
     | '/results'
     | '/shortlist'
     | '/university/$id'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/documents'
     | '/explore'
     | '/onboarding'
+    | '/profile'
     | '/results'
     | '/shortlist'
     | '/university/$id'
@@ -155,6 +167,7 @@ export interface RootRouteChildren {
   DocumentsRoute: typeof DocumentsRoute
   ExploreRoute: typeof ExploreRoute
   OnboardingRoute: typeof OnboardingRoute
+  ProfileRoute: typeof ProfileRoute
   ResultsRoute: typeof ResultsRoute
   ShortlistRoute: typeof ShortlistRoute
   UniversityIdRoute: typeof UniversityIdRoute
@@ -211,6 +224,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/results': {
       id: '/results'
       path: '/results'
@@ -243,6 +263,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocumentsRoute: DocumentsRoute,
   ExploreRoute: ExploreRoute,
   OnboardingRoute: OnboardingRoute,
+  ProfileRoute: ProfileRoute,
   ResultsRoute: ResultsRoute,
   ShortlistRoute: ShortlistRoute,
   UniversityIdRoute: UniversityIdRoute,
