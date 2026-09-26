@@ -11,7 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompareRouteImport } from './routes/compare'
-import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ShortlistRouteImport } from './routes/shortlist'
 import { Route as UniversityIdRouteImport } from './routes/university.$id'
@@ -26,9 +26,9 @@ const CompareRoute = CompareRouteImport.update({
   path: '/compare',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultsRoute = ResultsRouteImport.update({
@@ -50,7 +50,7 @@ const UniversityIdRoute = UniversityIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
-  '/profile': typeof ProfileRoute
+  '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
   '/shortlist': typeof ShortlistRoute
   '/university/$id': typeof UniversityIdRoute
@@ -58,7 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
-  '/profile': typeof ProfileRoute
+  '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
   '/shortlist': typeof ShortlistRoute
   '/university/$id': typeof UniversityIdRoute
@@ -67,7 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/compare': typeof CompareRoute
-  '/profile': typeof ProfileRoute
+  '/onboarding': typeof OnboardingRoute
   '/results': typeof ResultsRoute
   '/shortlist': typeof ShortlistRoute
   '/university/$id': typeof UniversityIdRoute
@@ -77,7 +77,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/compare'
-    | '/profile'
+    | '/onboarding'
     | '/results'
     | '/shortlist'
     | '/university/$id'
@@ -85,7 +85,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/compare'
-    | '/profile'
+    | '/onboarding'
     | '/results'
     | '/shortlist'
     | '/university/$id'
@@ -93,7 +93,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/compare'
-    | '/profile'
+    | '/onboarding'
     | '/results'
     | '/shortlist'
     | '/university/$id'
@@ -102,7 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompareRoute: typeof CompareRoute
-  ProfileRoute: typeof ProfileRoute
+  OnboardingRoute: typeof OnboardingRoute
   ResultsRoute: typeof ResultsRoute
   ShortlistRoute: typeof ShortlistRoute
   UniversityIdRoute: typeof UniversityIdRoute
@@ -124,11 +124,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompareRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/results': {
@@ -158,7 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompareRoute: CompareRoute,
-  ProfileRoute: ProfileRoute,
+  OnboardingRoute: OnboardingRoute,
   ResultsRoute: ResultsRoute,
   ShortlistRoute: ShortlistRoute,
   UniversityIdRoute: UniversityIdRoute,
