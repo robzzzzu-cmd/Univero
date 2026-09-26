@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useUnivero } from "@/lib/use-univero";
 import { money, type Profile } from "@/lib/univero";
 
-export const Route = createFileRoute("/profile")({ head: () => ({ meta: [{ title: "Your profile — Univero" }, { name: "description", content: "Tell Univero about your education, goals, budget and preferences to discover fitting universities." }, { property: "og:title", content: "Create your profile — Univero" }, { property: "og:description", content: "Your path to a personalized university shortlist starts here." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: ProfilePage });
+export const Route = createFileRoute("/onboarding")({ head: () => ({ meta: [{ title: "Your profile — Univero" }, { name: "description", content: "Tell Univero about your education, goals, budget and preferences to discover fitting universities." }, { property: "og:title", content: "Create your profile — Univero" }, { property: "og:description", content: "Your path to a personalized university shortlist starts here." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: ProfilePage });
 const steps = ["Education", "Tests", "Study plans", "Location", "Budget", "Preferences"];
 const locations = ["Europe", "United Kingdom", "United States", "Netherlands", "Italy", "Spain", "Germany", "France", "Scandinavia", "Anywhere"];
 const preferences = ["Big city", "Smaller university town", "Large university", "Smaller community", "International environment", "Strong career opportunities", "Campus life", "Prestige/ranking", "Affordable living costs", "Study abroad opportunities"];
