@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { ArrowRight, Bookmark, GitCompareArrows } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/univero-logo.png.asset.json";
+import logo from "@/assets/univero-logo.png";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -119,7 +119,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-md">
         <div className="page-shell flex h-[72px] items-center justify-between gap-2 md:h-[84px] md:gap-4">
-          <Link to="/" className="flex shrink-0 items-center" aria-label="Univero home"><img src={logo.url} alt="Univero" className="h-[55px] w-auto md:h-[72px]" /></Link>
+          <Link to="/" className="flex shrink-0 items-center" aria-label="Univero home"><img src={logo} alt="Univero" className="h-[55px] w-auto md:h-[72px]" /></Link>
           <nav className="hidden items-center gap-8 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
             <Link to="/results" className="hover:text-primary">Explore matches</Link><Link to="/compare" className="hover:text-primary">Compare</Link><Link to="/shortlist" className="hover:text-primary">My shortlist</Link><Link to="/exchange" className="hover:text-primary">Exchange student</Link>
           </nav>
@@ -131,7 +131,7 @@ function RootComponent() {
         </div>
       </header>
       <Outlet />
-      <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><img src={logo.url} alt="Univero" className="h-[64px] w-fit" /><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Prototype data</span></div></footer>
+      <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><img src={logo} alt="Univero" className="h-[64px] w-fit" /><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Prototype data</span></div></footer>
     </QueryClientProvider>
   );
 }
