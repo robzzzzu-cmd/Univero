@@ -19,16 +19,16 @@
   --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 8px;
 }
 :root {
-  --background: oklch(0.985 0.004 247); --foreground: oklch(0.22 0.033 250);
-  --card: oklch(1 0 0); --card-foreground: oklch(0.22 0.033 250);
-  --popover: oklch(1 0 0); --popover-foreground: oklch(0.22 0.033 250);
-  --primary: oklch(0.47 0.17 258); --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.94 0.024 245); --secondary-foreground: oklch(0.32 0.09 255);
-  --muted: oklch(0.955 0.006 250); --muted-foreground: oklch(0.51 0.025 250);
-  --accent: oklch(0.94 0.035 240); --accent-foreground: oklch(0.36 0.12 257);
-  --border: oklch(0.9 0.012 250); --input: oklch(0.9 0.012 250); --ring: oklch(0.47 0.17 258);
+  --background: oklch(0.988 0.005 60); --foreground: oklch(0.25 0.018 28);
+  --card: oklch(1 0 0); --card-foreground: oklch(0.25 0.018 28);
+  --popover: oklch(1 0 0); --popover-foreground: oklch(0.25 0.018 28);
+  --primary: oklch(0.35 0.135 28); --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.875 0.027 238); --secondary-foreground: oklch(0.26 0.035 238);
+  --muted: oklch(0.96 0.009 65); --muted-foreground: oklch(0.48 0.022 28);
+  --accent: oklch(0.92 0.024 65); --accent-foreground: oklch(0.35 0.135 28);
+  --border: oklch(0.9 0.012 60); --input: oklch(0.9 0.012 60); --ring: oklch(0.35 0.135 28);
   --destructive: oklch(0.54 0.2 25); --destructive-foreground: oklch(1 0 0);
-  --ink: oklch(0.17 0.043 252); --soft-blue: oklch(0.9 0.042 245);
+  --ink: oklch(0.2 0.022 28); --soft-blue: oklch(0.875 0.027 238);
   --success: oklch(0.42 0.11 160); --success-soft: oklch(0.94 0.035 160);
   --warning: oklch(0.57 0.14 65); --warning-soft: oklch(0.96 0.04 80);
 }
@@ -41,7 +41,7 @@
   ::selection { background: var(--soft-blue); color: var(--ink); }
 }
 @utility page-shell { width: min(100% - 40px, 1180px); margin-inline: auto; }
-@utility subtle-shadow { box-shadow: 0 12px 35px -20px oklch(0.23 0.05 255 / 0.24); }
+@utility subtle-shadow { box-shadow: 0 12px 35px -20px oklch(0.25 0.022 28 / 0.2); }
 @utility input-field { width: 100%; height: 48px; border: 1px solid var(--border); border-radius: 6px; background: var(--card); padding: 0 14px; outline: none; color: var(--foreground); &:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--soft-blue); } }
 @utility pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
