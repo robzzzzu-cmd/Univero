@@ -44,14 +44,14 @@ export function getMatch(u: University, p: Profile) {
   if (ielts && ielts < u.ielts) unmet.push("English score below indicative minimum");
   if (u.math && !p.math) unmet.push("Mathematics background required");
   const eligibility = unmet.length ? "Not eligible" : (!gpa || (!sat && !p.noTests) || (!ielts && !p.toefl)) ? "Possibly eligible" : "Eligible";
-  const academic = Math.max(10, Math.min(35, 27 + (gpa ? (gpa - u.minGpa) * 10 : 3) + (sat ? (sat - u.sat) / 80 : 0)));
+  const academic = Math.max(10, Math.min(35, 21 + (gpa ? (gpa - u.minGpa) * 8 : 3) + (sat ? (sat - u.sat) / 100 : 0)));
   const program = p.subject.toLowerCase() === u.subject.toLowerCase() ? 25 : 9;
   const affordability = u.tuition <= p.budget ? 15 : Math.max(1, 15 - (u.tuition - p.budget) / 2800);
   const location = !p.countries.length || p.countries.includes("Anywhere") || p.countries.includes(u.country) || (p.countries.includes("Europe") && !["United States", "United Kingdom"].includes(u.country)) || (p.countries.includes("Scandinavia") && u.country === "Denmark") ? 10 : 2;
   const language = ielts && ielts < u.ielts ? 3 : 10;
   const preferences = p.preferences.length ? 5 * u.tags.filter(tag => p.preferences.includes(tag)).length / p.preferences.length : 4;
   const score = Math.max(25, Math.min(98, Math.round(academic + program + affordability + location + language + preferences)));
-  const reasons = ["Matches your study interests", ...(u.tuition <= p.budget ? ["Within your tuition budget"] : []), ...(location === 10 ? ["Fits your preferred location"] : []), ...(u.tags.filter(tag => p.preferences.includes(tag)).slice(0, 2))];
+  const reasons = [...(program === 25 ? ["Matches your study interests"] : []), ...(u.tuition <= p.budget ? ["Within your tuition budget"] : []), ...(location === 10 ? ["Fits your preferred location"] : []), ...(u.tags.filter(tag => p.preferences.includes(tag)).slice(0, 2))];
   return { score, eligibility, unmet, reasons, affordability: u.tuition <= p.budget ? "Within budget" : u.tuition <= p.budget * 1.15 ? "Slightly above budget" : "Above budget" };
 }
 
