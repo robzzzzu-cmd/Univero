@@ -15,8 +15,8 @@ function Compare() {
   const suggestions = universities.filter(u => !compare.includes(u.id)).sort((a, b) => Number(saved.includes(b.id)) - Number(saved.includes(a.id)) || a.name.localeCompare(b.name));
   const rows: Row[] = [
     { label: "Match Score", values: ms.map(m => `${m.score}%`), raw: ms.map(m => m.score), best: "high" },
-    { label: "Eligibility", values: ms.map(m => m.eligibility), node: i => <EligibilityPill value={ms[i].eligibility} /> },
-    { label: "Admission outlook", values: ms.map(m => m.admission), node: i => <AdmissionPill value={ms[i].admission} /> },
+    { label: "Eligibility", values: ms.map(m => m.eligibility), node: i => <EligibilityPill value={ms[i]!.eligibility} /> },
+    { label: "Admission outlook", values: ms.map(m => m.admission), node: i => <AdmissionPill value={ms[i]!.admission} /> },
     { label: "Program", values: ms.map(m => m.program.name) },
     { label: "Tuition / year*", values: ms.map(m => money(m.tuition)), raw: ms.map(m => m.tuition), best: "low" },
     { label: "Living costs / year*", values: items.map(u => money(u.living)), raw: items.map(u => u.living), best: "low" },

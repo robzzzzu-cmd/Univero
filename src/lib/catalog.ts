@@ -157,7 +157,7 @@ const SPECIAL_DEADLINES: Record<string, [string, string]> = { oxford: ["15 Octob
 
 function build(row: Row): University {
   const [id, name, short, city, cc, domain, priv, tier, studentsK, intl, subj, setting] = row;
-  const country = COUNTRY[cc]; const r = RULES[cc]; const t = TIER[tier];
+  const country = COUNTRY[cc]!; const r = RULES[cc]!; const t = TIER[tier];
   let tuition = priv ? r[2] : r[0]; let tuitionEU = priv ? r[2] : r[1];
   if (cc === "GB") { tuition = tuitionEU = r[0] + (tier === 1 ? 10000 : tier === 2 ? 5000 : 0); }
   if (id === "tum") tuition = 6000;
@@ -165,9 +165,9 @@ function build(row: Row): University {
   const [deadline, deadlineDate] = SPECIAL_DEADLINES[id] ?? [r[4], r[5]];
   const duration = `${cc === "GB" && ["edinburgh", "glasgow", "standrews"].includes(id) ? 4 : r[6]} years`;
   const satRequired = cc === "US" ? tier <= 2 : false;
-  const codes = PROGRAM_OVERRIDES[id] ?? subj.split("").filter(c => SUBJECTS[c]).map(c => [c, SUBJECTS[c].names[(id.length + c.charCodeAt(0)) % SUBJECTS[c].names.length]] as [string, string]);
+  const codes = PROGRAM_OVERRIDES[id] ?? subj.split("").filter(c => SUBJECTS[c]).map(c => [c, SUBJECTS[c]!.names[(id.length + c.charCodeAt(0)) % SUBJECTS[c]!.names.length]] as [string, string]);
   const programs: Program[] = codes.map(([c, pname], i) => {
-    const s = SUBJECTS[c]; const deg = cc === "US" ? (s.deg === "LLB" ? "BA" : s.deg.replace("BSc", "BS")) : cc === "GB" || cc === "IE" ? s.deg : pname.includes("(") ? "Bachelor" : s.deg === "LLB" ? "LLB" : "BSc";
+    const s = SUBJECTS[c]!; const deg = cc === "US" ? (s.deg === "LLB" ? "BA" : s.deg.replace("BSc", "BS")) : cc === "GB" || cc === "IE" ? s.deg : pname.includes("(") ? "Bachelor" : s.deg === "LLB" ? "LLB" : "BSc";
     const bump = i === 0 ? 0 : (i % 2 ? -0.05 : 0.05);
     return {
       id: `${id}-${c.toLowerCase()}${i}`, name: `${deg} ${pname}`, degree: "Bachelor’s", subject: s.subject, duration, language: cc === "DE" && !priv && c !== "C" ? "English / German" : "English",
@@ -177,7 +177,7 @@ function build(row: Row): University {
       documents: ["Academic transcript", "Predicted or final grades", "English certificate", cc === "GB" ? "Personal statement" : "Motivation letter", "Recommendation letter", ...(cc === "US" ? ["CV / activities list", "SAT or ACT scores"] : ["CV / Resume"]), "Passport / ID"],
     };
   });
-  const main = programs[0];
+  const main = programs[0]!;
   const living = EXPENSIVE_CITIES[city] ?? r[3];
   const bigCity = setting === "B";
   const tags = [
