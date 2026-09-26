@@ -121,7 +121,7 @@ function RootComponent() {
         <div className="page-shell flex h-[72px] items-center justify-between gap-2 md:h-[84px] md:gap-4">
           <Link to="/" className="flex shrink-0 items-center" aria-label="Univero home"><img src={logo.url} alt="Univero" className="h-[55px] w-auto md:h-[72px]" /></Link>
           <nav className="hidden items-center gap-8 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
-            <Link to="/results" className="hover:text-primary">Explore matches</Link><Link to="/compare" className="hover:text-primary">Compare</Link><Link to="/shortlist" className="hover:text-primary">My shortlist</Link>
+            <Link to="/results" className="hover:text-primary">Explore matches</Link><Link to="/compare" className="hover:text-primary">Compare</Link><Link to="/shortlist" className="hover:text-primary">My shortlist</Link><Link to="/exchange" className="hover:text-primary">Exchange student</Link>
           </nav>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Button variant="ghost" size="icon" asChild className="md:hidden" title="Shortlist"><Link to="/shortlist"><Bookmark /></Link></Button>

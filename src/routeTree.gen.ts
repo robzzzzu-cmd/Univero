@@ -14,6 +14,7 @@ import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentsRouteImport } from './routes/documents'
+import { Route as ExchangeRouteImport } from './routes/exchange'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ProfileRouteImport } from './routes/profile'
@@ -44,6 +45,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const DocumentsRoute = DocumentsRouteImport.update({
   id: '/documents',
   path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExchangeRoute = ExchangeRouteImport.update({
+  id: '/exchange',
+  path: '/exchange',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRoute = ExploreRouteImport.update({
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/compare': typeof CompareRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
+  '/exchange': typeof ExchangeRoute
   '/explore': typeof ExploreRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/compare': typeof CompareRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
+  '/exchange': typeof ExchangeRoute
   '/explore': typeof ExploreRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/compare': typeof CompareRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
+  '/exchange': typeof ExchangeRoute
   '/explore': typeof ExploreRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/dashboard'
     | '/documents'
+    | '/exchange'
     | '/explore'
     | '/onboarding'
     | '/profile'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/dashboard'
     | '/documents'
+    | '/exchange'
     | '/explore'
     | '/onboarding'
     | '/profile'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/compare'
     | '/dashboard'
     | '/documents'
+    | '/exchange'
     | '/explore'
     | '/onboarding'
     | '/profile'
@@ -165,6 +177,7 @@ export interface RootRouteChildren {
   CompareRoute: typeof CompareRoute
   DashboardRoute: typeof DashboardRoute
   DocumentsRoute: typeof DocumentsRoute
+  ExchangeRoute: typeof ExchangeRoute
   ExploreRoute: typeof ExploreRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exchange': {
+      id: '/exchange'
+      path: '/exchange'
+      fullPath: '/exchange'
+      preLoaderRoute: typeof ExchangeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore': {
@@ -261,6 +281,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompareRoute: CompareRoute,
   DashboardRoute: DashboardRoute,
   DocumentsRoute: DocumentsRoute,
+  ExchangeRoute: ExchangeRoute,
   ExploreRoute: ExploreRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,

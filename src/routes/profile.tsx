@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import { Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, Checklist, meta, PageHeader, Progress } from "@/components/univero/bits";
+import { DocumentVault } from "@/components/univero/document-vault";
 import { completeness, countries as uniCountries, curricula, emptyEntry, gradeScales, languageLevels, subjects, testNames, uid, type Entry, type Profile, type SchoolYear, type TestEntry } from "@/lib/univero";
 import { useUnivero } from "@/lib/use-univero";
 
@@ -63,6 +64,7 @@ function ProfilePage() {
         <div className="mt-4 flex flex-wrap items-center gap-4"><Button variant="outline" onClick={() => set("tests", [...p.tests, { id: uid(), name: "SAT", score: "", date: "", status: "Taken" }])}><Plus /> Add test</Button><label className="flex items-center gap-2 text-sm"><input type="checkbox" className="accent-primary" checked={p.noTests} onChange={e => set("noTests", e.target.checked)} /> I’m applying test-optional where possible</label></div></Card>}
 
       {section === "CV & activities" && <>
+        <DocumentVault title="Upload your CV & certificates" hint="Add your CV, recommendation letters and certificates here — they'll show up in your document vault too." />
         {(Object.keys(entryConfig) as EntryKey[]).map(k => <Card key={k}><div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold text-ink">{entryConfig[k].title}</h2><Button size="sm" variant="outline" onClick={() => set(k, [...p[k], emptyEntry()])}><Plus /> Add</Button></div>
           {p[k].length === 0 && <p className="mt-3 text-sm text-muted-foreground">Nothing added yet.</p>}
           <div className="mt-4 space-y-4">{p[k].map(e => <div key={e.id} className="grid gap-3 rounded-md border border-border p-4 sm:grid-cols-2">{entryConfig[k].fields.map(([f, label]) => f === "description" ? <Field key={f} label={label} className="sm:col-span-2"><textarea className="input-field !h-20 py-2" value={e[f]} onChange={ev => setEntry(k, e.id, { [f]: ev.target.value })} /></Field> : <Field key={f} label={label}><input className="input-field" value={e[f]} onChange={ev => setEntry(k, e.id, { [f]: ev.target.value })} /></Field>)}<Button size="sm" variant="ghost" className="w-fit" onClick={() => set(k, p[k].filter(x => x.id !== e.id))}><Trash2 /> Remove</Button></div>)}</div></Card>)}
