@@ -54,7 +54,7 @@ export const tuitionFor = (u: University | Program, p: Profile) => (isEU(p) && "
 
 export function normaliseGrade(grade: string, scale: string): number | null {
   const g = grade.trim().toUpperCase(); if (!g) return null;
-  const frac = g.match(/^([\d.]+)\s*\/\s*([\d.]+)$/); if (frac) return num(frac[1]) / num(frac[2]);
+  const frac = g.match(/^([\d.]+)\s*\/\s*([\d.]+)$/); if (frac) return num(frac[1]!) / num(frac[2]!);
   const letters: Record<string, number> = { "A*": 1, A: 0.9, B: 0.8, C: 0.7, D: 0.6, E: 0.5 }; if (letters[g] !== undefined) return letters[g];
   const n = num(g); if (!n) return null;
   const max = scale === "1–5" ? 5 : scale === "1–7 (IB)" ? 7 : scale === "1–10" ? 10 : scale === "Percentage" ? 100 : scale === "4.0 GPA" ? 4 : n > 10 ? 100 : n > 7 ? 10 : 5;
@@ -75,7 +75,7 @@ export type Admission = "Strong" | "Competitive" | "Reach" | "Unknown";
 
 export function bestProgram(u: University, p: Profile): Program {
   const q = p.program.toLowerCase();
-  return (q && u.programs.find(pr => pr.name.toLowerCase().includes(q))) || u.programs.find(pr => pr.subject.toLowerCase() === p.subject.toLowerCase()) || u.programs[0];
+  return (q && u.programs.find(pr => pr.name.toLowerCase().includes(q))) || u.programs.find(pr => pr.subject.toLowerCase() === p.subject.toLowerCase()) || u.programs[0]!;
 }
 
 export function getMatch(u: University, p: Profile, programId?: string) {
@@ -136,7 +136,7 @@ export function readiness(u: University, p: Profile, docs: Doc[]) {
     { label: "Academic profile complete", done: !!p.gpa && !!p.curriculum, to: "/profile" },
     { label: "Transcript uploaded", done: hasDoc(docs, "Academic transcript", "Predicted grades"), to: "/documents" },
     { label: "English certificate uploaded", done: hasDoc(docs, "IELTS certificate", "Language certificate"), to: "/documents" },
-    ...(u.satRequired || u.programs[0].sat ? [{ label: "SAT certificate uploaded", done: hasDoc(docs, "SAT certificate"), to: "/documents" as const }] : []),
+    ...(u.satRequired || u.programs[0]!.sat ? [{ label: "SAT certificate uploaded", done: hasDoc(docs, "SAT certificate"), to: "/documents" as const }] : []),
     u.countryCode === "GB" ? { label: "Personal statement", done: hasDoc(docs, "Personal statement"), to: "/documents" } : { label: "Motivation letter", done: hasDoc(docs, "Motivation letter", "Personal statement"), to: "/documents" },
     { label: "Recommendation letter", done: hasDoc(docs, "Recommendation letter"), to: "/documents" },
     { label: "CV / Resume", done: hasDoc(docs, "CV / Resume"), to: "/documents" },

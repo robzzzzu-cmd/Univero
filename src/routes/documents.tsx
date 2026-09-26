@@ -13,8 +13,8 @@ const guessType = (name: string): DocType => { const n = name.toLowerCase(); if 
 
 // Simulated extraction used until real document parsing is connected
 function mockExtract(p: Profile) {
-  const subjects = p.years.flatMap(y => y.subjects).length ? [] : [["Mathematics", "5/5"], ["English", "5/5"], ["Physics", "4/5"], ["Chemistry", "4/5"], ["History", "5/5"], ["Economics", "5/5"], ["Biology", "4/5"], ["Estonian", "4/5"], ["German", "4/5"], ["Computer Science", "5/5"], ["Art", "5/5"], ["Physical Education", "5/5"]];
-  const activities = p.activities.length ? [] : [["Student Council", "President"], ["Model United Nations", "Head delegate"], ["School Football Team", "Member"]];
+  const subjects = p.years.flatMap(y => y.subjects).length ? [] : [["Mathematics", "5/5"], ["English", "5/5"], ["Physics", "4/5"], ["Chemistry", "4/5"], ["History", "5/5"], ["Economics", "5/5"], ["Biology", "4/5"], ["Estonian", "4/5"], ["German", "4/5"], ["Computer Science", "5/5"], ["Art", "5/5"], ["Physical Education", "5/5"]] as [string, string][];
+  const activities = p.activities.length ? [] : [["Student Council", "President"], ["Model United Nations", "Head delegate"], ["School Football Team", "Member"]] as [string, string][];
   return { subjects, activities, leadership: activities.filter(a => /president|head|captain/i.test(a[1])).length, ielts: p.ielts || "7.5", sat: p.sat || "1380" };
 }
 
