@@ -165,7 +165,7 @@ function build(row: Row): University {
   const [deadline, deadlineDate] = SPECIAL_DEADLINES[id] ?? [r[4], r[5]];
   const duration = `${cc === "GB" && ["edinburgh", "glasgow", "standrews"].includes(id) ? 4 : r[6]} years`;
   const satRequired = cc === "US" ? tier <= 2 : false;
-  const codes = PROGRAM_OVERRIDES[id] ?? subj.replace(/E(?=.*E)/, "").split("").filter(c => SUBJECTS[c]).map(c => [c, SUBJECTS[c].names[(id.length + c.charCodeAt(0)) % SUBJECTS[c].names.length]] as [string, string]);
+  const codes = PROGRAM_OVERRIDES[id] ?? subj.split("").filter(c => SUBJECTS[c]).map(c => [c, SUBJECTS[c].names[(id.length + c.charCodeAt(0)) % SUBJECTS[c].names.length]] as [string, string]);
   const programs: Program[] = codes.map(([c, pname], i) => {
     const s = SUBJECTS[c]; const deg = cc === "US" ? (s.deg === "LLB" ? "BA" : s.deg.replace("BSc", "BS")) : cc === "GB" || cc === "IE" ? s.deg : pname.includes("(") ? "Bachelor" : s.deg === "LLB" ? "LLB" : "BSc";
     const bump = i === 0 ? 0 : (i % 2 ? -0.05 : 0.05);
