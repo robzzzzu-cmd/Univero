@@ -122,10 +122,10 @@ function RootComponent() {
           <nav className="hidden items-center gap-8 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
             <Link to="/results" className="hover:text-primary">Explore matches</Link><Link to="/compare" className="hover:text-primary">Compare</Link><Link to="/shortlist" className="hover:text-primary">My shortlist</Link>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Button variant="ghost" size="icon" asChild className="md:hidden" title="Shortlist"><Link to="/shortlist"><Bookmark /></Link></Button>
             <Button variant="ghost" size="icon" asChild className="md:hidden" title="Compare"><Link to="/compare"><GitCompareArrows /></Link></Button>
-            <Button size="sm" asChild><Link to="/profile">Find my matches <ArrowRight /></Link></Button>
+            <Button size="sm" asChild><Link to="/profile"><span className="sm:hidden">Match me</span><span className="hidden sm:inline">Find my matches</span> <ArrowRight /></Link></Button>
           </div>
         </div>
       </header>
