@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 import { ArrowRight, Bookmark, GitCompareArrows } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/univero-logo.png.asset.json";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -85,7 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Sora:wght@400;500;600;700;800&display=swap" },
@@ -117,8 +118,8 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-md">
-        <div className="page-shell flex h-[72px] items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5 font-display text-xl font-bold text-ink"><span className="flex size-8 items-center justify-center rounded-md bg-primary text-lg font-bold text-primary-foreground">u.</span> univero<span className="text-primary">.</span></Link>
+        <div className="page-shell flex h-[72px] items-center justify-between gap-2 md:h-[84px] md:gap-4">
+          <Link to="/" className="flex shrink-0 items-center" aria-label="Univero home"><img src={logo.url} alt="Univero" className="h-[55px] w-auto md:h-[72px]" /></Link>
           <nav className="hidden items-center gap-8 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
             <Link to="/results" className="hover:text-primary">Explore matches</Link><Link to="/compare" className="hover:text-primary">Compare</Link><Link to="/shortlist" className="hover:text-primary">My shortlist</Link>
           </nav>
@@ -130,7 +131,7 @@ function RootComponent() {
         </div>
       </header>
       <Outlet />
-      <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><span className="font-display text-lg font-bold text-ink">univero<span className="text-primary">.</span></span><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Prototype data</span></div></footer>
+      <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><img src={logo.url} alt="Univero" className="h-[64px] w-fit" /><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Prototype data</span></div></footer>
     </QueryClientProvider>
   );
 }

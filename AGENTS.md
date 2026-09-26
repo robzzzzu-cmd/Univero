@@ -11,3 +11,4 @@
 
 - Univero's prototype uses client-side local storage for profile, shortlist, comparison, and application statuses because the supplied hackathon brief explicitly requests frontend-only interactions.
 - University catalog and transparent weighted scoring live in a shared client-safe module so every results, detail, and comparison view uses identical demo data.
+- The uploaded Univero logo is served via its CDN asset pointer while the favicon is a locally derived raster; this retains the supplied brand and keeps the repository lightweight.
