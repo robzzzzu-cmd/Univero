@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "002e910a-a05e-4df5-ad58-de941f675df6",
-  "project_id": "6cbf1e74-2dd0-462c-a11a-8e7c4a5dac66",
-  "url": "/__l5e/assets-v1/002e910a-a05e-4df5-ad58-de941f675df6/univero-logo.png",
-  "r2_key": "a/v1/6cbf1e74-2dd0-462c-a11a-8e7c4a5dac66/002e910a-a05e-4df5-ad58-de941f675df6/univero-logo.png",
-  "original_filename": "univero-logo.png",
-  "size": 13913,
   "content_type": "image/png",
-  "created_at": "2026-09-26T11:42:39Z"
+  "created_at": "2026-09-26T11:42:39Z",
+  "original_filename": "univero-logo.png",
+  "project_id": "d545793c-bbc8-4863-8290-0d695511d6a3",
+  "r2_key": "a/v1/d545793c-bbc8-4863-8290-0d695511d6a3/002e910a-a05e-4df5-ad58-de941f675df6/univero-logo.png",
+  "size": 13913,
+  "url": "/__l5e/assets-v1/002e910a-a05e-4df5-ad58-de941f675df6/univero-logo.png",
+  "version": 1
 }
