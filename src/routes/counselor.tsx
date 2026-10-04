@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, meta, PageHeader } from "@/components/univero/bits";
 import { universities } from "@/lib/catalog";
-import { askGeminiCounselor, getGeminiApiKey, saveGeminiApiKey } from "@/lib/gemini";
+import { askGeminiCounselor, getGeminiApiKey, saveGeminiApiKey, testGeminiConnection } from "@/lib/gemini";
 import { useUnivero } from "@/lib/use-univero";
 import type { University } from "@/lib/univero";
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/counselor")({
   head: () =>
     meta(
       "AI College Counselor — Univero",
-      "Interactive college counselor powered by Google Gemini Flash for conservative admissions guidance, GPA prerequisites, and tuition analysis."
+      "Interactive college counselor powered by Google Gemini 3.1 Flash-Lite for ultra-low-cost, conservative admissions guidance, GPA prerequisites, and tuition analysis."
     ),
   component: CounselorPage,
 });
@@ -32,11 +32,13 @@ function CounselorPage() {
   const [loading, setLoading] = useState(false);
   const [showKeyConfig, setShowKeyConfig] = useState(false);
   const [inlineKey, setInlineKey] = useState("");
+  const [testingKey, setTestingKey] = useState(false);
+  const [keyStatus, setKeyStatus] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       role: "model",
-      text: "Hello! I am your AI College Counselor powered by Google Gemini Flash. My guidance is strictly conservative and realistic: I do not inflate admission odds. I evaluate hard minimums, subject prerequisites, tuition costs, and competitive benchmarks. What would you like to explore today?",
+      text: "Hello! I am your AI College Counselor powered by Google Gemini 3.1 Flash-Lite. My guidance is strictly conservative and realistic: I do not inflate admission odds. I evaluate hard minimums, subject prerequisites, tuition costs, and competitive benchmarks. What would you like to explore today?",
       time: "Just now",
     },
   ]);
@@ -65,15 +67,27 @@ function CounselorPage() {
     "How competitive are business programs in the Netherlands and Baltics?",
   ];
 
-  const handleSaveKey = (e?: React.FormEvent) => {
+  const handleSaveKey = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!inlineKey.trim()) {
+    const clean = inlineKey.trim().replace(/^["']|["']$/g, "");
+    if (!clean) {
       toast.error("Please enter a valid Gemini API Key");
       return;
     }
-    saveGeminiApiKey(inlineKey.trim());
-    toast.success("Gemini API Key saved! Connecting counselor…");
-    setShowKeyConfig(false);
+    saveGeminiApiKey(clean);
+    setTestingKey(true);
+    setKeyStatus("Testing connection to Google Gemini…");
+
+    const result = await testGeminiConnection(clean);
+    setTestingKey(false);
+    if (result.ok) {
+      setKeyStatus(`Connected (${result.model})`);
+      toast.success(`Connected to Google Gemini using ${result.model}!`);
+      setTimeout(() => setShowKeyConfig(false), 900);
+    } else {
+      setKeyStatus(`Connection failed: ${result.error}`);
+      toast.error(`Key test failed: ${result.error}`);
+    }
   };
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -158,11 +172,11 @@ function CounselorPage() {
                 <div className="flex items-center gap-2">
                   <h3 className="font-display text-base font-bold text-ink">Admissions Counseling Session</h3>
                   <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-                    Gemini Flash
+                    Gemini 3.1 Flash-Lite
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <ShieldCheck className="size-3 text-emerald-600" /> Conservative, prudent & token-optimized
+                  <ShieldCheck className="size-3 text-emerald-600" /> Conservative, prudent & ultra-low-cost
                 </p>
               </div>
             </div>
@@ -203,21 +217,37 @@ function CounselorPage() {
                 </button>
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground leading-snug">
-                Paste your Google Gemini API key (starts with <code>AIzaSy...</code>) to activate counseling sessions directly on this device:
+                Paste your Google AI Studio API key (starts with <code>AIzaSy...</code>) to activate counseling sessions directly on this device:
               </p>
               <form onSubmit={handleSaveKey} className="mt-2.5 flex max-w-md gap-2">
                 <input
                   type="password"
                   value={inlineKey}
-                  onChange={e => setInlineKey(e.target.value)}
+                  onChange={e => {
+                    setInlineKey(e.target.value);
+                    setKeyStatus(null);
+                  }}
                   placeholder="AIzaSy..."
                   className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-xs outline-none focus:border-primary"
                   autoFocus
                 />
-                <Button type="submit" size="sm" className="h-8 px-4 text-xs shrink-0">
-                  <Check className="size-3 mr-1" /> Save Key
+                <Button type="submit" size="sm" disabled={testingKey} className="h-8 px-4 text-xs shrink-0">
+                  {testingKey ? (
+                    <span className="flex items-center gap-1">
+                      <RefreshCw className="size-3 animate-spin" /> Testing…
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <Check className="size-3 mr-1" /> Save & Test Key
+                    </span>
+                  )}
                 </Button>
               </form>
+              {keyStatus && (
+                <p className={`mt-2 text-xs font-medium ${keyStatus.includes("Connected") ? "text-emerald-700 dark:text-emerald-400" : keyStatus.includes("Testing") ? "text-amber-700" : "text-destructive"}`}>
+                  {keyStatus}
+                </p>
+              )}
             </div>
           )}
 

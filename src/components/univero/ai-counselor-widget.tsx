@@ -3,7 +3,7 @@ import { Bot, ChevronDown, Sparkles, Send, X, Key, ShieldCheck, RefreshCw, Check
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { universities } from "@/lib/catalog";
-import { askGeminiCounselor, getGeminiApiKey, saveGeminiApiKey } from "@/lib/gemini";
+import { askGeminiCounselor, getGeminiApiKey, saveGeminiApiKey, testGeminiConnection } from "@/lib/gemini";
 import { useUnivero } from "@/lib/use-univero";
 import type { University } from "@/lib/univero";
 
@@ -22,11 +22,13 @@ export function AiCounselorWidget() {
   const [loading, setLoading] = useState(false);
   const [showKeyConfig, setShowKeyConfig] = useState(false);
   const [inlineKey, setInlineKey] = useState("");
+  const [testingKey, setTestingKey] = useState(false);
+  const [keyStatus, setKeyStatus] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       role: "model",
-      text: "Hello! I'm your conservative AI College Counselor powered by Google Gemini Flash. I provide realistic, prudent admissions evaluations without inflated odds. Ask about GPA requirements, curriculum eligibility, budget fits, or specific universities.",
+      text: "Hello! I'm your conservative AI College Counselor powered by Google Gemini 3.1 Flash-Lite. I provide realistic, prudent admissions evaluations without inflated odds. Ask about GPA requirements, curriculum eligibility, budget fits, or specific universities.",
       time: "Just now",
     },
   ]);
@@ -57,15 +59,27 @@ export function AiCounselorWidget() {
     selectedUni ? `What are the minimum requirements for ${selectedUni.name}?` : "What documents should I prepare first?",
   ];
 
-  const handleSaveKey = (e?: React.FormEvent) => {
+  const handleSaveKey = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!inlineKey.trim()) {
+    const clean = inlineKey.trim().replace(/^["']|["']$/g, "");
+    if (!clean) {
       toast.error("Please enter a valid Gemini API Key");
       return;
     }
-    saveGeminiApiKey(inlineKey.trim());
-    toast.success("Gemini API Key saved! Connecting counselor…");
-    setShowKeyConfig(false);
+    saveGeminiApiKey(clean);
+    setTestingKey(true);
+    setKeyStatus("Testing connection to Google Gemini…");
+
+    const result = await testGeminiConnection(clean);
+    setTestingKey(false);
+    if (result.ok) {
+      setKeyStatus(`Connected (${result.model})`);
+      toast.success(`Connected to Google Gemini (${result.model})!`);
+      setTimeout(() => setShowKeyConfig(false), 900);
+    } else {
+      setKeyStatus(`Failed: ${result.error}`);
+      toast.error(`Key test failed: ${result.error}`);
+    }
   };
 
   const handleSendMessage = async (textToSend?: string) => {
@@ -162,11 +176,11 @@ export function AiCounselorWidget() {
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-display text-sm font-bold text-ink">AI College Counselor</h3>
                   <span className="rounded bg-primary/15 px-1.5 py-0.2 text-[10px] font-bold text-primary">
-                    Gemini Flash
+                    Gemini 3.1 Flash-Lite
                   </span>
                 </div>
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                  <ShieldCheck className="size-3 text-emerald-600" /> Conservative & Cost-Optimized
+                  <ShieldCheck className="size-3 text-emerald-600" /> Conservative & Ultra-Low-Cost
                 </p>
               </div>
             </div>
@@ -214,21 +228,37 @@ export function AiCounselorWidget() {
                 </button>
               </div>
               <p className="mt-1 text-[11px] text-muted-foreground leading-snug">
-                Paste your Google Gemini API key (e.g. <code>AIzaSy...</code>) to activate this counselor immediately:
+                Paste your Google AI Studio API key (starts with <code>AIzaSy...</code>) to activate counseling sessions:
               </p>
               <form onSubmit={handleSaveKey} className="mt-2 flex gap-1.5">
                 <input
                   type="password"
                   value={inlineKey}
-                  onChange={e => setInlineKey(e.target.value)}
+                  onChange={e => {
+                    setInlineKey(e.target.value);
+                    setKeyStatus(null);
+                  }}
                   placeholder="AIzaSy..."
                   className="flex-1 rounded border border-border bg-card px-2.5 py-1 text-xs outline-none focus:border-primary"
                   autoFocus
                 />
-                <Button type="submit" size="sm" className="h-7 px-3 text-xs shrink-0">
-                  <Check className="size-3 mr-1" /> Save
+                <Button type="submit" size="sm" disabled={testingKey} className="h-7 px-3 text-xs shrink-0">
+                  {testingKey ? (
+                    <span className="flex items-center gap-1">
+                      <RefreshCw className="size-3 animate-spin" /> Testing…
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <Check className="size-3" /> Save & Test
+                    </span>
+                  )}
                 </Button>
               </form>
+              {keyStatus && (
+                <p className={`mt-1.5 text-[10px] font-medium ${keyStatus.includes("Connected") ? "text-emerald-700 dark:text-emerald-400" : keyStatus.includes("Testing") ? "text-amber-700" : "text-destructive"}`}>
+                  {keyStatus}
+                </p>
+              )}
             </div>
           )}
 

@@ -13,49 +13,56 @@ export type GeminiEvaluation = {
 
 // Returns stored or environment GEMINI_API_KEY
 export function getGeminiApiKey(): string {
+  let raw = "";
+
   // 1. Check local storage override first
   if (typeof window !== "undefined") {
     try {
       const userStored = localStorage.getItem("univero-gemini-key");
-      if (userStored && userStored.trim()) return userStored.trim();
+      if (userStored && userStored.trim()) raw = userStored.trim();
     } catch {}
   }
 
   // 2. Check process.env (injected by Vite define at build time)
-  try {
-    // @ts-expect-error injected by Vite define
-    if (typeof process !== "undefined" && process?.env?.GEMINI_API_KEY) {
+  if (!raw) {
+    try {
       // @ts-expect-error injected by Vite define
-      return process.env.GEMINI_API_KEY;
-    }
-    // @ts-expect-error injected by Vite define
-    if (typeof process !== "undefined" && process?.env?.VITE_GEMINI_API_KEY) {
+      if (typeof process !== "undefined" && process?.env?.GEMINI_API_KEY) {
+        // @ts-expect-error injected by Vite define
+        raw = process.env.GEMINI_API_KEY;
+      }
       // @ts-expect-error injected by Vite define
-      return process.env.VITE_GEMINI_API_KEY;
-    }
-  } catch {}
+      if (!raw && typeof process !== "undefined" && process?.env?.VITE_GEMINI_API_KEY) {
+        // @ts-expect-error injected by Vite define
+        raw = process.env.VITE_GEMINI_API_KEY;
+      }
+    } catch {}
+  }
 
   // 3. Check import.meta.env
-  try {
-    // @ts-expect-error Vite env
-    if (typeof import.meta !== "undefined" && import.meta?.env?.VITE_GEMINI_API_KEY) {
+  if (!raw) {
+    try {
       // @ts-expect-error Vite env
-      return import.meta.env.VITE_GEMINI_API_KEY;
-    }
-    // @ts-expect-error Vite env
-    if (typeof import.meta !== "undefined" && import.meta?.env?.GEMINI_API_KEY) {
+      if (typeof import.meta !== "undefined" && import.meta?.env?.VITE_GEMINI_API_KEY) {
+        // @ts-expect-error Vite env
+        raw = import.meta.env.VITE_GEMINI_API_KEY;
+      }
       // @ts-expect-error Vite env
-      return import.meta.env.GEMINI_API_KEY;
-    }
-  } catch {}
+      if (!raw && typeof import.meta !== "undefined" && import.meta?.env?.GEMINI_API_KEY) {
+        // @ts-expect-error Vite env
+        raw = import.meta.env.GEMINI_API_KEY;
+      }
+    } catch {}
+  }
 
-  return "";
+  return raw ? raw.trim().replace(/^["']|["']$/g, "") : "";
 }
 
 export function saveGeminiApiKey(key: string) {
   if (typeof window !== "undefined") {
-    if (key.trim()) {
-      localStorage.setItem("univero-gemini-key", key.trim());
+    const cleaned = key.trim().replace(/^["']|["']$/g, "");
+    if (cleaned) {
+      localStorage.setItem("univero-gemini-key", cleaned);
     } else {
       localStorage.removeItem("univero-gemini-key");
     }
@@ -65,50 +72,99 @@ export function saveGeminiApiKey(key: string) {
 let cachedWorkingModel: string | null = null;
 
 /**
- * Dynamically queries Google ModelService.ListModels to detect active models
- * that support generateContent on the user's API key, prioritizing the cheapest Flash/Lite models.
+ * Dynamically queries Google ModelService.ListModels across v1beta and v1
+ * to detect active models that support generateContent on the user's API key,
+ * prioritizing the cheapest, high-throughput Flash-Lite / Flash models.
  */
 export async function getAvailableModel(apiKey: string): Promise<string> {
   if (cachedWorkingModel) return cachedWorkingModel;
 
-  try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    if (res.ok) {
-      const data = await res.json();
-      const modelsList: Array<{ name: string; supportedGenerationMethods?: string[] }> = data.models || [];
-      const supported = modelsList
-        .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
-        .map(m => m.name.replace(/^models\//, ""));
+  const cleanKey = apiKey.trim().replace(/^["']|["']$/g, "");
+  if (!cleanKey) return "gemini-3.1-flash-lite";
 
-      if (supported.length > 0) {
-        // Prioritize cheapest, lowest-cost modern Flash/Lite models
-        const preferred =
-          supported.find(m => m.includes("2.5-flash-lite")) ||
-          supported.find(m => m.includes("2.5-flash")) ||
-          supported.find(m => m.includes("2.0-flash-lite")) ||
-          supported.find(m => m.includes("2.0-flash")) ||
-          supported.find(m => m.includes("flash-lite")) ||
-          supported.find(m => m.includes("flash") && !m.includes("1.5")) ||
-          supported.find(m => m.includes("flash")) ||
-          supported.find(m => m.includes("pro")) ||
-          supported[0];
+  // Try v1beta and v1 ListModels endpoints
+  for (const version of ["v1beta", "v1"]) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/${version}/models?key=${encodeURIComponent(cleanKey)}`;
+      const res = await fetch(url, {
+        headers: {
+          "x-goog-api-key": cleanKey,
+        },
+      });
 
-        if (preferred) {
-          cachedWorkingModel = preferred;
-          return preferred;
+      if (res.ok) {
+        const data = await res.json();
+        const modelsList: Array<{ name: string; supportedGenerationMethods?: string[] }> = data.models || [];
+        const supported = modelsList
+          .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
+          .map(m => m.name.replace(/^models\//, ""));
+
+        if (supported.length > 0) {
+          // Prioritize cheapest, lowest-cost modern Flash/Lite models
+          const preferredCandidates = [
+            "gemini-3.1-flash-lite", // Cheapest ultra-low-cost high-throughput model
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash",
+            "gemini-3.8-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.5-flash",
+            "gemini-1.5-flash-8b",
+            "gemini-1.5-flash",
+          ];
+
+          for (const cand of preferredCandidates) {
+            if (supported.includes(cand)) {
+              cachedWorkingModel = cand;
+              return cand;
+            }
+          }
+
+          const fallback =
+            supported.find(m => m.includes("flash-lite")) ||
+            supported.find(m => m.includes("flash") && !m.includes("image") && !m.includes("tts")) ||
+            supported.find(m => m.includes("flash")) ||
+            supported[0];
+
+          if (fallback) {
+            cachedWorkingModel = fallback;
+            return fallback;
+          }
         }
       }
+    } catch (err) {
+      console.warn(`Could not list Gemini models dynamically via ${version}:`, err);
     }
-  } catch (err) {
-    console.warn("Could not list Gemini models dynamically:", err);
   }
 
-  return "gemini-2.5-flash";
+  // Default to Google's cheapest modern Flash-Lite model
+  return "gemini-3.1-flash-lite";
+}
+
+/**
+ * Quick diagnostic ping to verify whether an API key connects and functions.
+ */
+export async function testGeminiConnection(keyToTest?: string): Promise<{ ok: boolean; model: string; error?: string }> {
+  const apiKey = (keyToTest || getGeminiApiKey()).trim().replace(/^["']|["']$/g, "");
+  if (!apiKey) return { ok: false, model: "", error: "No API key configured." };
+
+  try {
+    const text = await callGeminiApi("Respond with one word: ready", undefined, {
+      maxOutputTokens: 10,
+      temperature: 0.1,
+    });
+    return {
+      ok: Boolean(text && text.trim()),
+      model: cachedWorkingModel || "gemini-3.1-flash-lite",
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { ok: false, model: "", error: msg };
+  }
 }
 
 /**
  * Call Gemini with ultra-low-cost, conservative settings.
- * Uses dynamic discovery and fallback chain to prevent 404 errors.
+ * Uses dynamic discovery and full fallback chain across v1beta and v1 to prevent 404 errors.
  */
 async function callGeminiApi(
   prompt: string,
@@ -121,73 +177,108 @@ async function callGeminiApi(
 ): Promise<string> {
   const apiKey = getGeminiApiKey();
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not set. Please add GEMINI_API_KEY or VITE_GEMINI_API_KEY to your Vercel Environment Variables.");
+    throw new Error("GEMINI_API_KEY is not set. Please enter your key in the counselor box or add GEMINI_API_KEY in Vercel.");
   }
 
-  // Dynamic discovery of supported models on Google API
-  const discovered = await getAvailableModel(apiKey);
+  const cleanKey = apiKey.trim().replace(/^["']|["']$/g, "");
+  const discovered = await getAvailableModel(cleanKey);
   const requestedModel = options?.model;
 
+  // Ranked candidate models (cheapest to run first, prioritizing active 2026 models)
   const modelCandidates = [
+    cachedWorkingModel,
     requestedModel,
     discovered,
-    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite", // Lowest cost tier
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash",
+    "gemini-3.8-flash",
     "gemini-2.5-flash-lite",
-    "gemini-2.0-flash",
-    "gemini-2.0-flash-lite",
-    "gemini-1.5-flash-latest",
+    "gemini-2.5-flash",
+    "gemini-1.5-flash-8b",
+    "gemini-1.5-flash",
   ].filter((v, i, a): v is string => Boolean(v) && a.indexOf(v) === i);
 
-  const body: {
-    contents: Array<{ parts: Array<{ text: string }> }>;
-    systemInstruction?: { parts: Array<{ text: string }> };
-    generationConfig: {
-      temperature: number;
-      maxOutputTokens: number;
-    };
-  } = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: options?.temperature ?? 0.1, // Conservative, deterministic
-      maxOutputTokens: options?.maxOutputTokens ?? 400, // Capped to stay ultra-cheap
-    },
-  };
-
-  if (systemInstruction) {
-    body.systemInstruction = {
-      parts: [{ text: systemInstruction }],
-    };
-  }
-
-  let lastError: Error | null = null;
+  let lastErrorMessage = "";
 
   for (const model of modelCandidates) {
-    try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+    for (const version of ["v1beta", "v1"]) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/${version}/models/${model}:generateContent?key=${encodeURIComponent(cleanKey)}`;
 
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) {
-          cachedWorkingModel = model; // Cache the successful model
-          return text;
+        // Build version-compatible payload
+        const body: Record<string, unknown> = {
+          contents: [
+            {
+              parts: [
+                {
+                  text: version === "v1" && systemInstruction
+                    ? `[SYSTEM RULES]:\n${systemInstruction}\n\n[USER PROMPT]:\n${prompt}`
+                    : prompt,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            temperature: options?.temperature ?? 0.1, // Conservative, deterministic
+            maxOutputTokens: options?.maxOutputTokens ?? 300, // Capped to stay ultra-cheap
+          },
+        };
+
+        if (version === "v1beta" && systemInstruction) {
+          body.systemInstruction = {
+            parts: [{ text: systemInstruction }],
+          };
         }
-      } else {
+
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": cleanKey,
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            cachedWorkingModel = model; // Cache the successful model for subsequent instant calls
+            return text;
+          }
+        }
+
         const errText = await response.text();
-        lastError = new Error(`Model ${model} error (${response.status}): ${errText}`);
+        let parsedMessage = errText;
+        try {
+          const parsed = JSON.parse(errText);
+          parsedMessage = parsed.error?.message || errText;
+        } catch {}
+
+        // If key itself is rejected, fail fast so user knows immediately
+        if (response.status === 400 && parsedMessage.toUpperCase().includes("API_KEY_INVALID")) {
+          throw new Error("Invalid Gemini API Key. Please verify your key at Google AI Studio (aistudio.google.com).");
+        }
+        if (response.status === 403) {
+          throw new Error(`API Key access denied (${parsedMessage}). Verify project permissions on Google AI Studio.`);
+        }
+        if (response.status === 429) {
+          throw new Error("Gemini quota or rate limit exceeded. Please wait a moment before trying again.");
+        }
+
+        lastErrorMessage = `${model} (${version}): ${parsedMessage}`;
+      } catch (err: unknown) {
+        if (err instanceof Error && (err.message.includes("Invalid Gemini API Key") || err.message.includes("access denied") || err.message.includes("quota"))) {
+          throw err;
+        }
+        lastErrorMessage = err instanceof Error ? err.message : String(err);
       }
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
     }
   }
 
   cachedWorkingModel = null;
-  throw lastError || new Error("Failed to get response from Gemini API");
+  throw new Error(`Could not connect to Gemini models. ${lastErrorMessage ? `Details: ${lastErrorMessage}` : "Please check your key and model permissions."}`);
 }
 
 /**
@@ -294,7 +385,7 @@ Return ONLY valid JSON matching:
 
 /**
  * Interactive Ultra-Low-Cost Conservative Gemini Counselor Chat
- * Uses gemini-1.5-flash-8b, max 300 tokens, temperature 0.1 to run as cheaply and conservatively as possible.
+ * Uses gemini-3.1-flash-lite, max 280 tokens, temperature 0.1 to run as cheaply and conservatively as possible.
  */
 export async function askGeminiCounselor(
   question: string,
@@ -327,7 +418,8 @@ Rules:
   const prompt = `${historyContext ? `Context:\n${historyContext}\n\n` : ""}Question: ${question}`;
 
   return await callGeminiApi(prompt, systemInstruction, {
+    model: "gemini-3.1-flash-lite",
     temperature: 0.1, // Prudent, deterministic
-    maxOutputTokens: 300, // Very cheap, fast
+    maxOutputTokens: 280, // Very cheap, fast
   });
 }
