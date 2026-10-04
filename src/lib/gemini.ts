@@ -62,9 +62,53 @@ export function saveGeminiApiKey(key: string) {
   }
 }
 
+let cachedWorkingModel: string | null = null;
+
 /**
- * Call Gemini with cheap, low-end model options (gemini-1.5-flash-8b / gemini-2.0-flash-lite)
- * Uses conservative parameters: low temperature (0.1) and token limits to keep costs near zero.
+ * Dynamically queries Google ModelService.ListModels to detect active models
+ * that support generateContent on the user's API key, prioritizing the cheapest Flash/Lite models.
+ */
+export async function getAvailableModel(apiKey: string): Promise<string> {
+  if (cachedWorkingModel) return cachedWorkingModel;
+
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (res.ok) {
+      const data = await res.json();
+      const modelsList: Array<{ name: string; supportedGenerationMethods?: string[] }> = data.models || [];
+      const supported = modelsList
+        .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
+        .map(m => m.name.replace(/^models\//, ""));
+
+      if (supported.length > 0) {
+        // Prioritize cheapest, lowest-cost modern Flash/Lite models
+        const preferred =
+          supported.find(m => m.includes("2.5-flash-lite")) ||
+          supported.find(m => m.includes("2.5-flash")) ||
+          supported.find(m => m.includes("2.0-flash-lite")) ||
+          supported.find(m => m.includes("2.0-flash")) ||
+          supported.find(m => m.includes("flash-lite")) ||
+          supported.find(m => m.includes("flash") && !m.includes("1.5")) ||
+          supported.find(m => m.includes("flash")) ||
+          supported.find(m => m.includes("pro")) ||
+          supported[0];
+
+        if (preferred) {
+          cachedWorkingModel = preferred;
+          return preferred;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Could not list Gemini models dynamically:", err);
+  }
+
+  return "gemini-2.5-flash";
+}
+
+/**
+ * Call Gemini with ultra-low-cost, conservative settings.
+ * Uses dynamic discovery and fallback chain to prevent 404 errors.
  */
 async function callGeminiApi(
   prompt: string,
@@ -80,14 +124,19 @@ async function callGeminiApi(
     throw new Error("GEMINI_API_KEY is not set. Please add GEMINI_API_KEY or VITE_GEMINI_API_KEY to your Vercel Environment Variables.");
   }
 
-  // Model chain: start with ultra-cheap 1.5-flash-8b, fallback to flash-lite / 1.5-flash
-  const requestedModel = options?.model || "gemini-1.5-flash-8b";
+  // Dynamic discovery of supported models on Google API
+  const discovered = await getAvailableModel(apiKey);
+  const requestedModel = options?.model;
+
   const modelCandidates = [
     requestedModel,
-    "gemini-1.5-flash-8b",
+    discovered,
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+    "gemini-2.0-flash",
     "gemini-2.0-flash-lite",
-    "gemini-1.5-flash",
-  ].filter((v, i, a) => a.indexOf(v) === i); // unique
+    "gemini-1.5-flash-latest",
+  ].filter((v, i, a): v is string => Boolean(v) && a.indexOf(v) === i);
 
   const body: {
     contents: Array<{ parts: Array<{ text: string }> }>;
@@ -124,7 +173,10 @@ async function callGeminiApi(
       if (response.ok) {
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text;
+        if (text) {
+          cachedWorkingModel = model; // Cache the successful model
+          return text;
+        }
       } else {
         const errText = await response.text();
         lastError = new Error(`Model ${model} error (${response.status}): ${errText}`);
@@ -134,6 +186,7 @@ async function callGeminiApi(
     }
   }
 
+  cachedWorkingModel = null;
   throw lastError || new Error("Failed to get response from Gemini API");
 }
 
@@ -228,7 +281,6 @@ Return ONLY valid JSON matching:
 
   try {
     const rawText = await callGeminiApi(prompt, systemInstruction, {
-      model: "gemini-1.5-flash-8b", // Cheap model
       temperature: 0.1, // Conservative
       maxOutputTokens: 600,
     });
@@ -258,7 +310,7 @@ export async function askGeminiCounselor(
     ? `Student: ${profile.name || "Student"} (GPA: ${profile.gpa || "N/A"}, Curriculum: ${profile.curriculum || "N/A"}, Nationality: ${profile.nationality || "N/A"}, Budget: €${profile.budget || "N/A"}/yr).`
     : `Student: General prospective applicant.`;
 
-  const systemInstruction = `You are Univero's ultra-efficient, conservative AI College Counselor running on Gemini 1.5 Flash-8B.
+  const systemInstruction = `You are Univero's ultra-efficient, conservative AI College Counselor running on Google Gemini.
 Rules:
 - Be highly conservative, realistic, and prudent: NEVER promise admission or provide ungrounded reassurance. Top and selective universities reject the vast majority of applicants.
 - Focus strictly on hard criteria (GPA, required subjects, English test minimums, tuition budget, deadlines).
@@ -275,7 +327,6 @@ Rules:
   const prompt = `${historyContext ? `Context:\n${historyContext}\n\n` : ""}Question: ${question}`;
 
   return await callGeminiApi(prompt, systemInstruction, {
-    model: "gemini-1.5-flash-8b", // Google's lowest-cost model (~$0.0375 / 1M tokens)
     temperature: 0.1, // Prudent, deterministic
     maxOutputTokens: 300, // Very cheap, fast
   });

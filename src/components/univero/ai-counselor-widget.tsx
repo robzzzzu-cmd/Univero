@@ -26,7 +26,7 @@ export function AiCounselorWidget() {
     {
       id: "welcome",
       role: "model",
-      text: "Hello! I'm your conservative AI College Counselor running on Gemini 1.5 Flash-8B. I provide realistic, prudent admissions evaluations without inflated odds. Ask about GPA requirements, curriculum eligibility, budget fits, or specific universities.",
+      text: "Hello! I'm your conservative AI College Counselor powered by Google Gemini Flash. I provide realistic, prudent admissions evaluations without inflated odds. Ask about GPA requirements, curriculum eligibility, budget fits, or specific universities.",
       time: "Just now",
     },
   ]);
@@ -162,7 +162,7 @@ export function AiCounselorWidget() {
                 <div className="flex items-center gap-1.5">
                   <h3 className="font-display text-sm font-bold text-ink">AI College Counselor</h3>
                   <span className="rounded bg-primary/15 px-1.5 py-0.2 text-[10px] font-bold text-primary">
-                    1.5 Flash-8B
+                    Gemini Flash
                   </span>
                 </div>
                 <p className="text-[11px] text-muted-foreground flex items-center gap-1">

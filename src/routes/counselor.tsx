@@ -13,7 +13,7 @@ export const Route = createFileRoute("/counselor")({
   head: () =>
     meta(
       "AI College Counselor — Univero",
-      "Interactive college counselor powered by Gemini 1.5 Flash-8B for conservative admissions guidance, GPA prerequisites, and tuition analysis."
+      "Interactive college counselor powered by Google Gemini Flash for conservative admissions guidance, GPA prerequisites, and tuition analysis."
     ),
   component: CounselorPage,
 });
@@ -36,7 +36,7 @@ function CounselorPage() {
     {
       id: "welcome",
       role: "model",
-      text: "Hello! I am your AI College Counselor powered by Google Gemini (Gemini 1.5 Flash-8B). My guidance is strictly conservative and realistic: I do not inflate admission odds. I evaluate hard minimums, subject prerequisites, tuition costs, and competitive benchmarks. What would you like to explore today?",
+      text: "Hello! I am your AI College Counselor powered by Google Gemini Flash. My guidance is strictly conservative and realistic: I do not inflate admission odds. I evaluate hard minimums, subject prerequisites, tuition costs, and competitive benchmarks. What would you like to explore today?",
       time: "Just now",
     },
   ]);
@@ -138,7 +138,7 @@ function CounselorPage() {
       <PageHeader
         eyebrow="Gemini AI Research"
         title="Interactive College Counselor"
-        subtitle="Ultra-low-cost, conservative guidance powered by Gemini 1.5 Flash-8B. Real requirement checks, honest admission probability, and cost breakdowns."
+        subtitle="Ultra-low-cost, conservative guidance powered by Google Gemini Flash. Real requirement checks, honest admission probability, and cost breakdowns."
       >
         <Button asChild variant="outline">
           <Link to="/results">Explore all universities</Link>
@@ -158,7 +158,7 @@ function CounselorPage() {
                 <div className="flex items-center gap-2">
                   <h3 className="font-display text-base font-bold text-ink">Admissions Counseling Session</h3>
                   <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
-                    gemini-1.5-flash-8b
+                    Gemini Flash
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -376,7 +376,7 @@ function CounselorPage() {
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="size-3.5 text-emerald-600 mt-0.5 shrink-0" />
-                <span><strong>Strict Cost-Efficiency:</strong> Runs on Gemini 1.5 Flash-8B at ~$0.0375 / 1M tokens to remain ultra-affordable.</span>
+                <span><strong>Strict Cost-Efficiency:</strong> Runs on Google Gemini Flash with strict token capping to remain ultra-affordable.</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="size-3.5 text-emerald-600 mt-0.5 shrink-0" />
