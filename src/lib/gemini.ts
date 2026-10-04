@@ -222,17 +222,25 @@ Return ONLY valid JSON matching:
  */
 export async function askGeminiCounselor(
   question: string,
-  university: University,
-  profile: Profile,
+  university?: University | null,
+  profile?: Profile | null,
   conversationHistory: Array<{ role: "user" | "model"; text: string }> = []
 ): Promise<string> {
+  const uniContext = university
+    ? `Target University: ${university.name} (${university.city}, ${university.country}), Tuition: €${university.tuition}/yr, Min GPA: ${university.minGpa}, IELTS: ${university.ielts}.`
+    : `Target: Global University Database & General Higher Education Admissions.`;
+
+  const studentContext = profile
+    ? `Student: ${profile.name || "Student"} (GPA: ${profile.gpa || "N/A"}, Curriculum: ${profile.curriculum || "N/A"}, Nationality: ${profile.nationality || "N/A"}, Budget: €${profile.budget || "N/A"}/yr).`
+    : `Student: General prospective applicant.`;
+
   const systemInstruction = `You are Univero's ultra-efficient, conservative AI College Counselor running on Gemini 1.5 Flash-8B.
 Rules:
-- Be highly conservative, realistic, and prudent: NEVER promise admission or provide ungrounded reassurance. Admissions are competitive.
-- Focus on hard requirements (GPA, required subjects, English test minimums, deadlines, budget).
-- Keep your answers concise, practical, grounded, and under 130 words to minimize token consumption.
-- Student: ${profile.name || "Student"} (GPA: ${profile.gpa || "N/A"}, Curriculum: ${profile.curriculum || "N/A"}, Nationality: ${profile.nationality || "N/A"}, Budget: €${profile.budget || "N/A"}).
-- Target: ${university.name} (${university.city}, ${university.country}).`;
+- Be highly conservative, realistic, and prudent: NEVER promise admission or provide ungrounded reassurance. Top and selective universities reject the vast majority of applicants.
+- Focus strictly on hard criteria (GPA, required subjects, English test minimums, tuition budget, deadlines).
+- Keep answers concise, actionable, and under 130 words to minimize token usage.
+- ${studentContext}
+- ${uniContext}`;
 
   // Only take the last 2 conversation turns to save input tokens
   const recentHistory = conversationHistory.slice(-2);

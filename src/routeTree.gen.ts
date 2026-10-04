@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApplicationsRouteImport } from './routes/applications'
 import { Route as CompareRouteImport } from './routes/compare'
+import { Route as CounselorRouteImport } from './routes/counselor'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as ExchangeRouteImport } from './routes/exchange'
@@ -35,6 +36,11 @@ const ApplicationsRoute = ApplicationsRouteImport.update({
 const CompareRoute = CompareRouteImport.update({
   id: '/compare',
   path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CounselorRoute = CounselorRouteImport.update({
+  id: '/counselor',
+  path: '/counselor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsRoute
   '/compare': typeof CompareRoute
+  '/counselor': typeof CounselorRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/exchange': typeof ExchangeRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsRoute
   '/compare': typeof CompareRoute
+  '/counselor': typeof CounselorRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/exchange': typeof ExchangeRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/applications': typeof ApplicationsRoute
   '/compare': typeof CompareRoute
+  '/counselor': typeof CounselorRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRoute
   '/exchange': typeof ExchangeRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/'
     | '/applications'
     | '/compare'
+    | '/counselor'
     | '/dashboard'
     | '/documents'
     | '/exchange'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/'
     | '/applications'
     | '/compare'
+    | '/counselor'
     | '/dashboard'
     | '/documents'
     | '/exchange'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/'
     | '/applications'
     | '/compare'
+    | '/counselor'
     | '/dashboard'
     | '/documents'
     | '/exchange'
@@ -175,6 +187,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApplicationsRoute: typeof ApplicationsRoute
   CompareRoute: typeof CompareRoute
+  CounselorRoute: typeof CounselorRoute
   DashboardRoute: typeof DashboardRoute
   DocumentsRoute: typeof DocumentsRoute
   ExchangeRoute: typeof ExchangeRoute
@@ -207,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/compare'
       fullPath: '/compare'
       preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/counselor': {
+      id: '/counselor'
+      path: '/counselor'
+      fullPath: '/counselor'
+      preLoaderRoute: typeof CounselorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -279,6 +299,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApplicationsRoute: ApplicationsRoute,
   CompareRoute: CompareRoute,
+  CounselorRoute: CounselorRoute,
   DashboardRoute: DashboardRoute,
   DocumentsRoute: DocumentsRoute,
   ExchangeRoute: ExchangeRoute,

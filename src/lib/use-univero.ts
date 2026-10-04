@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { defaultProfile, readCompare, readDocs, readProfile, readSaved, readStatuses, type AppStatus, type Doc, type Profile } from "./univero";
-import { apiLogin, apiLogout, apiRegister, fetchUserDataFromDb, getActiveUser, saveUserDataToDb, type UserAccount } from "./db";
+import { apiLogin, apiLogout, apiRegister, apiVerifyEmail, apiResendVerification, fetchUserDataFromDb, getActiveUser, saveUserDataToDb, type UserAccount } from "./db";
 
 const saveLocal = (key: string, value: unknown) => {
   if (typeof window !== "undefined") {
@@ -160,7 +160,7 @@ export function useUnivero() {
 
   // Account operations
   const registerUser = async (email: string, pass: string, name: string) => {
-    const newAcc = await apiRegister(email, pass, name);
+    const { user: newAcc, verificationCode } = await apiRegister(email, pass, name);
     setUser(newAcc);
     // Migrate current state into newly created user account
     await saveUserDataToDb(newAcc.id, {
@@ -171,7 +171,21 @@ export function useUnivero() {
       statuses,
     });
     setSyncState("synced");
-    return newAcc;
+    return { user: newAcc, verificationCode };
+  };
+
+  const verifyEmail = async (code: string) => {
+    if (!user) throw new Error("No user to verify");
+    const updated = await apiVerifyEmail(user.email, code);
+    setUser(updated);
+    return updated;
+  };
+
+  const resendVerification = async () => {
+    if (!user) throw new Error("No user logged in");
+    const code = await apiResendVerification(user.email);
+    setUser({ ...user, verificationCode: code });
+    return code;
   };
 
   const loginUser = async (email: string, pass: string) => {
@@ -217,6 +231,8 @@ export function useUnivero() {
     updateDoc,
     removeDoc,
     registerUser,
+    verifyEmail,
+    resendVerification,
     loginUser,
     logoutUser,
   };

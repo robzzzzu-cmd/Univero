@@ -8,9 +8,10 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { ArrowRight, Bookmark, Cloud, GitCompareArrows, User } from "lucide-react";
+import { ArrowRight, Bookmark, Cloud, GitCompareArrows, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/univero-logo.png";
+import { AiCounselorWidget } from "@/components/univero/ai-counselor-widget";
 import { AuthModal } from "@/components/univero/auth-modal";
 import { useUnivero } from "@/lib/use-univero";
 
@@ -124,8 +125,12 @@ function RootComponent() {
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-md">
         <div className="page-shell flex h-[72px] items-center justify-between gap-2 md:h-[84px] md:gap-4">
           <Link to="/" className="flex shrink-0 items-center" aria-label="Univero home"><img src={logo} alt="Univero" className="h-[55px] w-auto md:h-[72px]" /></Link>
-          <nav className="hidden items-center gap-6 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
+          <nav className="hidden items-center gap-5 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
             <Link to="/results" className="hover:text-primary">Explore matches</Link>
+            <Link to="/counselor" className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-primary hover:bg-primary/20 transition-colors">
+              <Sparkles className="size-3.5 text-amber-500 animate-pulse" />
+              <span>AI Counselor</span>
+            </Link>
             <Link to="/compare" className="hover:text-primary">Compare</Link>
             <Link to="/shortlist" className="hover:text-primary">Shortlist</Link>
             <Link to="/applications" className="hover:text-primary">Applications</Link>
@@ -133,6 +138,9 @@ function RootComponent() {
             <Link to="/exchange" className="hover:text-primary">Exchange</Link>
           </nav>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Button variant="ghost" size="icon" asChild title="AI Counselor" className="md:hidden">
+              <Link to="/counselor"><Sparkles className="size-4 text-primary" /></Link>
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -160,6 +168,7 @@ function RootComponent() {
         </div>
       </header>
       <Outlet />
+      <AiCounselorWidget />
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
       <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><img src={logo} alt="Univero" className="h-[64px] w-fit" /><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Real Research & Cross-Device Sync</span></div></footer>
     </QueryClientProvider>

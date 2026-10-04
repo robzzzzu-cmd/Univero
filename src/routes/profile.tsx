@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { Plus, Trash2, X } from "lucide-react";
+import { CheckCircle2, Lock, LogIn, Mail, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AuthModal } from "@/components/univero/auth-modal";
 import { Card, Checklist, meta, PageHeader, Progress } from "@/components/univero/bits";
 import { DocumentVault } from "@/components/univero/document-vault";
 import { completeness, countries as uniCountries, curricula, emptyEntry, gradeScales, languageLevels, subjects, testNames, uid, type Entry, type Profile, type SchoolYear, type TestEntry } from "@/lib/univero";
@@ -28,7 +29,9 @@ const entryConfig: Record<EntryKey, { title: string; fields: [keyof Entry, strin
 };
 
 function ProfilePage() {
-  const { profile: p, docs, ready, updateProfile } = useUnivero();
+  const { user, profile: p, docs, ready, updateProfile } = useUnivero();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"auth" | "verify">("auth");
   const [section, setSection] = useState<(typeof sections)[number]>("Personal"); const [skill, setSkill] = useState("");
   const set = <K extends keyof Profile>(k: K, v: Profile[K]) => updateProfile({ ...p, [k]: v });
   const setYear = (id: string, patch: Partial<SchoolYear>) => set("years", p.years.map(y => (y.id === id ? { ...y, ...patch } : y)));
@@ -36,7 +39,110 @@ function ProfilePage() {
   const setEntry = (k: EntryKey, id: string, patch: Partial<Entry>) => set(k, p[k].map(e => (e.id === id ? { ...e, ...patch } : e)));
   const toggle = (k: "countries" | "preferences", v: string) => set(k, p[k].includes(v) ? p[k].filter(x => x !== v) : [...p[k], v]);
   const c = completeness(p, docs);
+
   if (!ready) return <main className="page-shell min-h-[70vh] py-16" />;
+
+  // 1. Account Gate: Must have an account to configure student profile
+  if (!user) {
+    return (
+      <main className="page-shell min-h-[75vh] py-12 md:py-16">
+        <PageHeader
+          eyebrow="Account Required"
+          title="Sign in to configure your profile"
+          subtitle="Your student profile, academic grades, uploaded CV, transcripts, and application tracker are securely synchronized to your cloud database account across all your devices."
+        />
+        <div className="mx-auto mt-10 max-w-xl text-center">
+          <Card className="border-2 border-dashed p-8 sm:p-10">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-primary/10 text-primary shadow-inner">
+              <Lock className="size-8" />
+            </div>
+            <h2 className="mt-5 font-display text-2xl font-bold text-ink">
+              Student Account Required
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              To configure your GPA, curriculum, test scores, extracurriculars, and upload transcripts, please sign in or register a new student account.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                onClick={() => {
+                  setAuthMode("auth");
+                  setAuthModalOpen(true);
+                }}
+                className="w-full sm:w-auto"
+              >
+                <LogIn className="mr-2 size-4" />
+                Sign In / Create Account
+              </Button>
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
+                <Link to="/results">
+                  Explore Universities First
+                </Link>
+              </Button>
+            </div>
+
+            <div className="mt-6 rounded-lg bg-muted/40 p-4 text-left text-xs text-muted-foreground">
+              <p className="mb-1.5 font-semibold text-foreground">Why do I need an account?</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Saves your profile, GPA, and document uploads securely in the database</li>
+                <li>Access your shortlist and applications across mobile and desktop</li>
+                <li>Enables personalized Gemini admissions evaluations tailored to your records</li>
+              </ul>
+            </div>
+          </Card>
+        </div>
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode={authMode} />
+      </main>
+    );
+  }
+
+  // 2. Email Verification Gate: Must verify email address
+  if (!user.emailVerified) {
+    return (
+      <main className="page-shell min-h-[75vh] py-12 md:py-16">
+        <PageHeader
+          eyebrow="Verification Required"
+          title="Verify your student email"
+          subtitle="Please confirm your email address to unlock full student profile configuration, document uploads, and university application tracking."
+        />
+        <div className="mx-auto mt-10 max-w-xl text-center">
+          <Card className="border-amber-300 bg-amber-50/20 p-8 sm:p-10 dark:border-amber-900 dark:bg-amber-950/10">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 shadow-inner">
+              <Mail className="size-8" />
+            </div>
+            <h2 className="mt-5 font-display text-2xl font-bold text-ink">
+              Email Verification Pending
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              A 6-digit confirmation code was sent to <strong className="text-foreground">{user.email}</strong>. Please enter this code to activate your account and configure your profile.
+            </p>
+
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                onClick={() => {
+                  setAuthMode("verify");
+                  setAuthModalOpen(true);
+                }}
+                className="w-full sm:w-auto"
+              >
+                <Mail className="mr-2 size-4" />
+                Enter 6-Digit Code
+              </Button>
+              <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
+                <Link to="/results">
+                  Explore Universities First
+                </Link>
+              </Button>
+            </div>
+          </Card>
+        </div>
+        <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode="verify" />
+      </main>
+    );
+  }
+
   return <main className="page-shell min-h-[70vh] py-12 md:py-16">
     <PageHeader eyebrow="Profile" title="My student profile" subtitle="The more detail you add, the more precise your matches and requirement checks become. Changes save automatically."><Button asChild><Link to="/results">See my matches</Link></Button></PageHeader>
     <div className="mt-8 flex gap-1 overflow-x-auto border-b border-border" role="tablist">{sections.map(s => <button key={s} role="tab" aria-selected={section === s} onClick={() => setSection(s)} className={`shrink-0 border-b-2 px-4 py-3 text-sm font-semibold ${section === s ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>{s}</button>)}</div>
@@ -84,6 +190,24 @@ function ProfilePage() {
         <h3 className="mt-6 text-xs font-bold uppercase text-muted-foreground">Preferred destinations</h3><div className="mt-2 flex flex-wrap gap-2">{destinations.map(d => <button key={d} onClick={() => toggle("countries", d)} className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${p.countries.includes(d) ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>{d}</button>)}</div>
         <h3 className="mt-6 text-xs font-bold uppercase text-muted-foreground">University environment</h3><div className="mt-2 flex flex-wrap gap-2">{preferenceOptions.map(d => <button key={d} onClick={() => toggle("preferences", d)} className={`rounded-md border px-3 py-1.5 text-xs font-semibold ${p.preferences.includes(d) ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"}`}>{d}</button>)}</div></Card>}
     </div>
-      <aside className="space-y-4"><Card><div className="flex justify-between"><h2 className="font-display text-lg font-bold text-ink">Profile completeness</h2><strong className="text-primary">{c.percent}%</strong></div><Progress value={c.percent} className="my-4" /><Checklist items={c.checks} /></Card><p className="px-1 text-xs text-muted-foreground">Stored only in this browser for the prototype.</p></aside>
-    </div></main>;
+      <aside className="space-y-4">
+        {user && (
+          <Card className="border-success/30 bg-success/5 p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="size-4 text-success" />
+              <span className="text-xs font-bold text-foreground">Verified Student Account</span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {user.name} ({user.email})
+            </p>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Cloud-synchronized to your database profile across all devices.
+            </p>
+          </Card>
+        )}
+        <Card><div className="flex justify-between"><h2 className="font-display text-lg font-bold text-ink">Profile completeness</h2><strong className="text-primary">{c.percent}%</strong></div><Progress value={c.percent} className="my-4" /><Checklist items={c.checks} /></Card>
+      </aside>
+    </div>
+    <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} initialMode={authMode} />
+  </main>;
 }
