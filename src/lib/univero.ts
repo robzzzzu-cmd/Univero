@@ -1,5 +1,5 @@
-import { EU_COUNTRIES, universities, type Program, type University } from "./catalog";
-export { universities, countries, subjects, EU_COUNTRIES, type University, type Program, type Scholarship } from "./catalog";
+import { EU_COUNTRIES, universities, getUniversityById, type Program, type University } from "./catalog";
+export { universities, countries, subjects, EU_COUNTRIES, getUniversityById, searchGlobalUniversities, dynamicUniversityCache, type University, type Program, type Scholarship } from "./catalog";
 
 export type SubjectGrade = { id: string; name: string; grade: string };
 export type SchoolYear = { id: string; label: string; kind: "Final" | "Predicted"; subjects: SubjectGrade[] };
@@ -160,7 +160,7 @@ export function completeness(p: Profile, docs: Doc[]) {
 }
 
 export const daysUntil = (iso: string) => Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000);
-export const universityById = (id: string) => universities.find(u => u.id === id);
+export const universityById = (id: string) => getUniversityById(id);
 
 // ---------- Local storage ----------
 function read<T>(key: string, fallback: T): T {

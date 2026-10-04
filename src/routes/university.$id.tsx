@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { AdmissionPill, Card, Checklist, EligibilityPill, meta, Progress, RequirementList, UniLogo } from "@/components/univero/bits";
 import { evaluateWithGemini, askGeminiCounselor, type GeminiEvaluation } from "@/lib/gemini";
 import { useUnivero } from "@/lib/use-univero";
-import { getMatch, money, readiness, tuitionFor, universities } from "@/lib/univero";
+import { getMatch, money, readiness, tuitionFor, universities, getUniversityById } from "@/lib/univero";
 
 export const Route = createFileRoute("/university/$id")({
   head: ({ params }) => {
-    const u = universities.find(x => x.id === params.id);
+    const u = getUniversityById(params.id);
     return meta(
       `${u?.name || "University"} — Univero`,
       `Programs, admissions, costs, scholarships and AI admissions research for ${u?.name || "this university"}.`
@@ -33,7 +33,7 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
 
 function Detail() {
   const { id } = Route.useParams();
-  const u = universities.find(x => x.id === id);
+  const u = getUniversityById(id);
   const { profile, saved, compare, docs, ready, toggleSaved, toggleCompare } = useUnivero();
   const [tab, setTab] = useState<(typeof tabs)[number]>("Overview");
   const [programId, setProgramId] = useState<string>();

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdmissionPill, Card, EligibilityPill, meta, PageHeader, UniLogo } from "@/components/univero/bits";
-import { getMatch, money, universities } from "@/lib/univero";
+import { getMatch, money, universities, getUniversityById } from "@/lib/univero";
 import { useUnivero } from "@/lib/use-univero";
 
 export const Route = createFileRoute("/compare")({ head: () => meta("Compare universities — Univero", "Compare 2–4 universities side by side: match, eligibility, costs, scholarships, deadlines and fit."), component: Compare });
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/compare")({ head: () => meta("Compare uni
 type Row = { label: string; values: (string | number)[]; best?: "high" | "low"; raw?: number[]; node?: (i: number) => React.ReactNode };
 function Compare() {
   const { profile, compare, saved, ready, toggleCompare } = useUnivero();
-  const items = compare.map(id => universities.find(u => u.id === id)).filter((u): u is NonNullable<typeof u> => !!u);
+  const items = compare.map(id => getUniversityById(id)).filter((u): u is NonNullable<typeof u> => !!u);
   const ms = items.map(u => getMatch(u, profile));
   const suggestions = universities.filter(u => !compare.includes(u.id)).sort((a, b) => Number(saved.includes(b.id)) - Number(saved.includes(a.id)) || a.name.localeCompare(b.name));
   const rows: Row[] = [
