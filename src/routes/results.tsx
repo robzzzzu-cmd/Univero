@@ -28,6 +28,27 @@ function Results() {
       <label className="flex h-10 items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-semibold"><input type="checkbox" checked={scholarships} onChange={e => setScholarships(e.target.checked)} className="accent-primary" /> Scholarships</label>
     </div>
     <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_285px]"><div>
+      <div className="mb-6 rounded-xl border border-primary/30 bg-gradient-to-r from-accent/50 to-card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
+              AI
+            </span>
+            <div>
+              <h3 className="font-display text-base font-bold text-ink">Gemini Admissions Intelligence</h3>
+              <p className="text-xs text-muted-foreground">
+                Researching admissions across {results.length} universities based on your grades, curriculum, budget and goals.
+              </p>
+            </div>
+          </div>
+          <Button size="sm" asChild variant="default" className="gap-1.5">
+            <Link to="/documents">
+              Analyze my documents →
+            </Link>
+          </Button>
+        </div>
+      </div>
+
       <p className="mb-4 text-sm text-muted-foreground">{results.length} universities found · Sorted by eligibility, then match</p>
       <div className="grid gap-4">{ready && results.slice(0, limit).map(({ u }) => <MatchCard key={u.id} university={u} profile={profile} saved={saved.includes(u.id)} compared={compare.includes(u.id)} onSave={toggleSaved} onCompare={toggleCompare} />)}
         {ready && results.length > limit && <Button variant="outline" onClick={() => setLimit(limit + 15)}>Show more ({results.length - limit} left)</Button>}

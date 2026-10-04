@@ -17,7 +17,7 @@ export type University = {
   math: boolean; scholarship: boolean; competitiveness: "Strong" | "Competitive" | "Reach"; deadline: string; deadlineDate: string; satRequired: boolean;
 };
 
-const COUNTRY: Record<string, string> = { GB: "United Kingdom", NL: "Netherlands", IT: "Italy", ES: "Spain", DE: "Germany", DK: "Denmark", SE: "Sweden", FI: "Finland", FR: "France", US: "United States", EE: "Estonia", LV: "Latvia", LT: "Lithuania", CH: "Switzerland", IE: "Ireland", BE: "Belgium", AT: "Austria", PT: "Portugal", CA: "Canada" };
+const COUNTRY: Record<string, string> = { GB: "United Kingdom", NL: "Netherlands", IT: "Italy", ES: "Spain", DE: "Germany", DK: "Denmark", SE: "Sweden", FI: "Finland", FR: "France", US: "United States", EE: "Estonia", LV: "Latvia", LT: "Lithuania", CH: "Switzerland", IE: "Ireland", BE: "Belgium", AT: "Austria", PT: "Portugal", CA: "Canada", SG: "Singapore", HK: "Hong Kong", AU: "Australia", PL: "Poland", CZ: "Czechia" };
 export const EU_COUNTRIES = ["Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czechia", "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", "Spain", "Sweden"];
 const flag = (cc: string) => String.fromCodePoint(...[...cc].map(c => 127397 + c.charCodeAt(0)));
 
@@ -33,8 +33,20 @@ const RULES: Record<string, [number, number, number, number, string, string, num
   IE: [22000, 3000, 22000, 16000, "1 February", "2027-02-01", 4], BE: [6500, 1000, 6500, 11500, "1 March", "2027-03-01", 3],
   AT: [1500, 0, 1500, 12500, "15 March", "2027-03-15", 3], PT: [7000, 3500, 7000, 9500, "31 March", "2027-03-31", 3],
   CA: [38000, 38000, 38000, 17000, "15 January", "2027-01-15", 4],
+  SG: [21000, 21000, 21000, 15000, "28 February", "2027-02-28", 4],
+  HK: [23000, 23000, 23000, 14000, "20 February", "2027-02-20", 4],
+  AU: [34000, 34000, 34000, 18000, "30 November", "2026-11-30", 3],
+  PL: [4000, 2000, 6000, 8000, "15 July", "2027-07-15", 3],
+  CZ: [5000, 0, 7500, 8500, "28 February", "2027-02-28", 3],
 };
-const EXPENSIVE_CITIES: Record<string, number> = { London: 20500, Amsterdam: 17000, Milan: 15000, Munich: 14500, Paris: 16500, Copenhagen: 17000, Stockholm: 15000, Zurich: 24000, Boston: 23000, "New York": 25000, Cambridge: 17000, Stanford: 24000, Berkeley: 22000, "Los Angeles": 22000, Dublin: 18000, Oxford: 17000 };
+const EXPENSIVE_CITIES: Record<string, number> = {
+  London: 20500, Amsterdam: 17000, Milan: 15000, Munich: 14500, Paris: 16500, Copenhagen: 17000,
+  Stockholm: 15000, Zurich: 24000, Boston: 23000, "New York": 25000, Cambridge: 17000, Stanford: 24000,
+  Berkeley: 22000, "Los Angeles": 22000, Dublin: 18000, Oxford: 17000, Singapore: 18000, "Hong Kong": 17500,
+  Sydney: 19500, Melbourne: 18500, Chicago: 21000, Pasadena: 23000, Baltimore: 19000, Evanston: 20000,
+  Pittsburgh: 18000, Atlanta: 18500, Providence: 20500, Hanover: 21000, Nashville: 19500, Houston: 18000,
+  Seattle: 21500, Berlin: 13500, Geneva: 23000,
+};
 
 const SUBJECTS: Record<string, { subject: string; names: string[]; req: string[]; deg: string }> = {
   B: { subject: "Business", names: ["International Business Administration", "Business Administration", "Management"], req: ["Mathematics"], deg: "BSc" },
@@ -174,6 +186,41 @@ const ROWS: Row[] = [
   ["porto", "University of Porto", "Porto", "Porto", "PT", "up.pt", 0, 3, 32, 10, "BECNY", "B"],
   ["waterloo", "University of Waterloo", "Waterloo", "Waterloo", "CA", "uwaterloo.ca", 0, 2, 42, 25, "BCNY", "C"],
   ["dauphine", "Paris-Dauphine University", "Dauphine", "Paris", "FR", "dauphine.fr", 0, 2, 10, 25, "BE", "B"],
+  ["caltech", "California Institute of Technology", "Caltech", "Pasadena", "US", "caltech.edu", 1, 1, 2, 30, "CN", "C"],
+  ["jhu", "Johns Hopkins University", "Johns Hopkins", "Baltimore", "US", "jhu.edu", 1, 1, 28, 25, "ECNPY", "B"],
+  ["northwestern", "Northwestern University", "Northwestern", "Evanston", "US", "northwestern.edu", 1, 1, 22, 22, "BECNPY", "C"],
+  ["cmu", "Carnegie Mellon University", "CMU", "Pittsburgh", "US", "cmu.edu", 1, 1, 15, 35, "BCN", "B"],
+  ["gatech", "Georgia Institute of Technology", "Georgia Tech", "Atlanta", "US", "gatech.edu", 0, 1, 45, 25, "BCN", "B"],
+  ["brown", "Brown University", "Brown", "Providence", "US", "brown.edu", 1, 1, 10, 20, "ECNPY", "C"],
+  ["dartmouth", "Dartmouth College", "Dartmouth", "Hanover", "US", "dartmouth.edu", 1, 1, 6, 16, "BECN", "T"],
+  ["vanderbilt", "Vanderbilt University", "Vanderbilt", "Nashville", "US", "vanderbilt.edu", 1, 1, 13, 16, "BECPY", "B"],
+  ["rice", "Rice University", "Rice", "Houston", "US", "rice.edu", 1, 1, 8, 25, "BECN", "B"],
+  ["uwashington", "University of Washington", "UW", "Seattle", "US", "washington.edu", 0, 2, 49, 18, "BECNY", "B"],
+  ["birmingham", "University of Birmingham", "Birmingham", "Birmingham", "GB", "birmingham.ac.uk", 0, 2, 38, 30, "BECLNY", "C"],
+  ["qmul", "Queen Mary University of London", "Queen Mary", "London", "GB", "qmul.ac.uk", 0, 3, 33, 45, "BECLNY", "B"],
+  ["lancaster", "Lancaster University", "Lancaster", "Lancaster", "GB", "lancaster.ac.uk", 0, 3, 16, 35, "BECLPY", "C"],
+  ["newcastle", "Newcastle University", "Newcastle", "Newcastle", "GB", "ncl.ac.uk", 0, 3, 28, 28, "BECLNY", "B"],
+  ["cardiff", "Cardiff University", "Cardiff", "Cardiff", "GB", "cardiff.ac.uk", 0, 3, 33, 25, "BECLNY", "B"],
+  ["wur", "Wageningen University & Research", "Wageningen", "Wageningen", "NL", "wur.nl", 0, 2, 13, 28, "CN", "T"],
+  ["tuberlin", "Technical University of Berlin", "TU Berlin", "Berlin", "DE", "tu.berlin", 0, 2, 35, 27, "BCN", "B"],
+  ["goethe", "Goethe University Frankfurt", "Goethe U", "Frankfurt", "DE", "uni-frankfurt.de", 0, 3, 45, 16, "BELPY", "B"],
+  ["polytechnique", "École Polytechnique", "l'X", "Paris", "FR", "polytechnique.edu", 0, 1, 4, 40, "CNE", "C"],
+  ["sorbonne", "Sorbonne University", "Sorbonne", "Paris", "FR", "sorbonne-universite.fr", 0, 2, 55, 20, "ECNPY", "B"],
+  ["unibas", "University of Basel", "Basel", "Basel", "CH", "unibas.ch", 0, 2, 13, 25, "ELPY", "B"],
+  ["karolinska", "Karolinska Institute", "Karolinska", "Stockholm", "SE", "ki.se", 0, 1, 6, 25, "Y", "B"],
+  ["chalmers", "Chalmers University of Technology", "Chalmers", "Gothenburg", "SE", "chalmers.se", 0, 2, 11, 22, "CN", "B"],
+  ["galway", "University of Galway", "Galway", "Galway", "IE", "universityofgalway.ie", 0, 3, 19, 20, "BECLNY", "T"],
+  ["tugraz", "Graz University of Technology", "TU Graz", "Graz", "AT", "tugraz.at", 0, 3, 17, 22, "CN", "T"],
+  ["uwarsaw", "University of Warsaw", "U of Warsaw", "Warsaw", "PL", "uw.edu.pl", 0, 3, 40, 10, "BELPY", "B"],
+  ["cuni", "Charles University", "Charles U", "Prague", "CZ", "cuni.cz", 0, 3, 50, 15, "BELPY", "B"],
+  ["nus", "National University of Singapore", "NUS", "Singapore", "SG", "nus.edu.sg", 0, 1, 40, 32, "BECNPY", "C"],
+  ["ntu", "Nanyang Technological University", "NTU", "Singapore", "SG", "ntu.edu.sg", 0, 1, 33, 30, "BCN", "C"],
+  ["hku", "University of Hong Kong", "HKU", "Hong Kong", "HK", "hku.hk", 0, 1, 31, 43, "BECLPY", "B"],
+  ["hkust", "Hong Kong University of Science and Technology", "HKUST", "Hong Kong", "HK", "hkust.edu.hk", 0, 1, 16, 35, "BCNE", "C"],
+  ["unimelb", "University of Melbourne", "UniMelb", "Melbourne", "AU", "unimelb.edu.au", 0, 2, 52, 40, "BECNPY", "B"],
+  ["usyd", "University of Sydney", "USyd", "Sydney", "AU", "sydney.edu.au", 0, 2, 60, 42, "BECLNY", "B"],
+  ["ualberta", "University of Alberta", "UAlberta", "Edmonton", "CA", "ualberta.ca", 0, 3, 40, 22, "BECNPY", "B"],
+  ["mcmaster", "McMaster University", "McMaster", "Hamilton", "CA", "mcmaster.ca", 0, 2, 35, 20, "BCNY", "C"],
 ];
 
 const TIER = {

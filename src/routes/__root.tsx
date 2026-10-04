@@ -7,10 +7,12 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
-import { ArrowRight, Bookmark, GitCompareArrows } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
+import { ArrowRight, Bookmark, Cloud, GitCompareArrows, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/univero-logo.png";
+import { AuthModal } from "@/components/univero/auth-modal";
+import { useUnivero } from "@/lib/use-univero";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -114,16 +116,43 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { user, syncState } = useUnivero();
+  const [authOpen, setAuthOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
       <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-md">
         <div className="page-shell flex h-[72px] items-center justify-between gap-2 md:h-[84px] md:gap-4">
           <Link to="/" className="flex shrink-0 items-center" aria-label="Univero home"><img src={logo} alt="Univero" className="h-[55px] w-auto md:h-[72px]" /></Link>
-          <nav className="hidden items-center gap-8 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
-            <Link to="/results" className="hover:text-primary">Explore matches</Link><Link to="/compare" className="hover:text-primary">Compare</Link><Link to="/shortlist" className="hover:text-primary">My shortlist</Link><Link to="/exchange" className="hover:text-primary">Exchange student</Link>
+          <nav className="hidden items-center gap-6 text-sm font-semibold text-muted-foreground md:flex" aria-label="Main navigation">
+            <Link to="/results" className="hover:text-primary">Explore matches</Link>
+            <Link to="/compare" className="hover:text-primary">Compare</Link>
+            <Link to="/shortlist" className="hover:text-primary">Shortlist</Link>
+            <Link to="/applications" className="hover:text-primary">Applications</Link>
+            <Link to="/documents" className="hover:text-primary">Documents</Link>
+            <Link to="/exchange" className="hover:text-primary">Exchange</Link>
           </nav>
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setAuthOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-semibold"
+              title={user ? `Signed in as ${user.email} (Sync: ${syncState})` : "Sign in to save across devices"}
+            >
+              {user ? (
+                <>
+                  <User className="size-3.5 text-primary" />
+                  <span className="hidden sm:inline max-w-28 truncate">{user.name.split(" ")[0]}</span>
+                  <Cloud className="size-3 text-success fill-success/20 ml-0.5" />
+                </>
+              ) : (
+                <>
+                  <User className="size-3.5 text-muted-foreground" />
+                  <span className="hidden sm:inline">Sign In / Sync</span>
+                </>
+              )}
+            </Button>
             <Button variant="ghost" size="icon" asChild className="md:hidden" title="Shortlist"><Link to="/shortlist"><Bookmark /></Link></Button>
             <Button variant="ghost" size="icon" asChild className="md:hidden" title="Compare"><Link to="/compare"><GitCompareArrows /></Link></Button>
             <Button size="sm" asChild><Link to="/profile"><span className="sm:hidden">Match me</span><span className="hidden sm:inline">Find my matches</span> <ArrowRight /></Link></Button>
@@ -131,7 +160,8 @@ function RootComponent() {
         </div>
       </header>
       <Outlet />
-      <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><img src={logo} alt="Univero" className="h-[64px] w-fit" /><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Prototype data</span></div></footer>
+      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+      <footer className="mt-20 border-t border-border bg-card"><div className="page-shell flex flex-col gap-3 py-9 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between"><img src={logo} alt="Univero" className="h-[64px] w-fit" /><span>Find where you belong. Made for the possibilities ahead.</span><span>© 2026 Univero · Real Research & Cross-Device Sync</span></div></footer>
     </QueryClientProvider>
   );
 }
