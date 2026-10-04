@@ -6,7 +6,17 @@
 // You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
+const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "";
+
 export default defineConfig({
+  vite: {
+    define: {
+      "process.env.GEMINI_API_KEY": JSON.stringify(geminiKey),
+      "process.env.VITE_GEMINI_API_KEY": JSON.stringify(geminiKey),
+      "import.meta.env.VITE_GEMINI_API_KEY": JSON.stringify(geminiKey),
+      "import.meta.env.GEMINI_API_KEY": JSON.stringify(geminiKey),
+    },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Bot, Sparkles, Send, RefreshCw, ShieldCheck, CheckCircle2, AlertTriangle, ArrowRight, BookOpen, GraduationCap } from "lucide-react";
+import { Bot, Sparkles, Send, RefreshCw, ShieldCheck, CheckCircle2, AlertTriangle, ArrowRight, BookOpen, GraduationCap, Key, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, meta, PageHeader } from "@/components/univero/bits";
 import { universities } from "@/lib/catalog";
-import { askGeminiCounselor } from "@/lib/gemini";
+import { askGeminiCounselor, getGeminiApiKey, saveGeminiApiKey } from "@/lib/gemini";
 import { useUnivero } from "@/lib/use-univero";
 import type { University } from "@/lib/univero";
 
@@ -29,6 +30,8 @@ function CounselorPage() {
   const [selectedUniId, setSelectedUniId] = useState<string>("general");
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showKeyConfig, setShowKeyConfig] = useState(false);
+  const [inlineKey, setInlineKey] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -40,6 +43,10 @@ function CounselorPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setInlineKey(getGeminiApiKey());
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -58,9 +65,27 @@ function CounselorPage() {
     "How competitive are business programs in the Netherlands and Baltics?",
   ];
 
+  const handleSaveKey = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!inlineKey.trim()) {
+      toast.error("Please enter a valid Gemini API Key");
+      return;
+    }
+    saveGeminiApiKey(inlineKey.trim());
+    toast.success("Gemini API Key saved! Connecting counselor…");
+    setShowKeyConfig(false);
+  };
+
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
     if (!text || loading) return;
+
+    const currentKey = getGeminiApiKey();
+    if (!currentKey) {
+      setShowKeyConfig(true);
+      toast.warning("Please configure your Gemini API Key first.");
+      return;
+    }
 
     const userMsg: Message = {
       id: `u_${Date.now()}`,
@@ -91,12 +116,15 @@ function CounselorPage() {
       ]);
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : "Failed to connect to AI Counselor.";
+      if (errorMsg.includes("GEMINI_API_KEY")) {
+        setShowKeyConfig(true);
+      }
       setMessages(prev => [
         ...prev,
         {
           id: `err_${Date.now()}`,
           role: "model",
-          text: `⚠️ Counselor unavailable: ${errorMsg}. Please ensure GEMINI_API_KEY is configured in your project settings.`,
+          text: `⚠️ Counselor note: ${errorMsg}. Please configure your API key above to continue.`,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
@@ -139,15 +167,59 @@ function CounselorPage() {
               </div>
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMessages([messages[0]!])}
-              className="text-xs text-muted-foreground"
-            >
-              <RefreshCw className="size-3.5 mr-1" /> Reset
-            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowKeyConfig(!showKeyConfig)}
+                className={`text-xs ${showKeyConfig || !getGeminiApiKey() ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300" : "text-muted-foreground"}`}
+                title="Configure Gemini API Key"
+              >
+                <Key className="size-3.5 mr-1 text-amber-600" /> API Key
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMessages([messages[0]!])}
+                className="text-xs text-muted-foreground"
+              >
+                <RefreshCw className="size-3.5 mr-1" /> Reset
+              </Button>
+            </div>
           </div>
+
+          {/* Quick inline key config if missing or toggled */}
+          {showKeyConfig && (
+            <div className="border-b border-border bg-amber-500/10 px-5 py-3 text-xs animate-in slide-in-from-top-2">
+              <div className="flex items-center justify-between font-bold text-ink">
+                <span className="flex items-center gap-1.5">
+                  <Key className="size-3.5 text-amber-600" /> Configure Gemini API Key
+                </span>
+                <button
+                  onClick={() => setShowKeyConfig(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground leading-snug">
+                Paste your Google Gemini API key (starts with <code>AIzaSy...</code>) to activate counseling sessions directly on this device:
+              </p>
+              <form onSubmit={handleSaveKey} className="mt-2.5 flex max-w-md gap-2">
+                <input
+                  type="password"
+                  value={inlineKey}
+                  onChange={e => setInlineKey(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-xs outline-none focus:border-primary"
+                  autoFocus
+                />
+                <Button type="submit" size="sm" className="h-8 px-4 text-xs shrink-0">
+                  <Check className="size-3 mr-1" /> Save Key
+                </Button>
+              </form>
+            </div>
+          )}
 
           {/* Target Focus Selector */}
           <div className="flex items-center gap-3 border-b border-border/70 bg-muted/15 px-5 py-2.5">

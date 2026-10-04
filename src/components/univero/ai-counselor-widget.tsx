@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, ChevronDown, Sparkles, Send, X, ArrowUpRight, ShieldCheck, RefreshCw } from "lucide-react";
+import { Bot, ChevronDown, Sparkles, Send, X, Key, ShieldCheck, RefreshCw, Check } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { universities } from "@/lib/catalog";
-import { askGeminiCounselor } from "@/lib/gemini";
+import { askGeminiCounselor, getGeminiApiKey, saveGeminiApiKey } from "@/lib/gemini";
 import { useUnivero } from "@/lib/use-univero";
 import type { University } from "@/lib/univero";
 
@@ -14,11 +15,13 @@ type Message = {
 };
 
 export function AiCounselorWidget() {
-  const { profile, user } = useUnivero();
+  const { profile } = useUnivero();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedUniId, setSelectedUniId] = useState<string>("general");
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showKeyConfig, setShowKeyConfig] = useState(false);
+  const [inlineKey, setInlineKey] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -30,6 +33,10 @@ export function AiCounselorWidget() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setInlineKey(getGeminiApiKey());
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -50,9 +57,28 @@ export function AiCounselorWidget() {
     selectedUni ? `What are the minimum requirements for ${selectedUni.name}?` : "What documents should I prepare first?",
   ];
 
+  const handleSaveKey = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!inlineKey.trim()) {
+      toast.error("Please enter a valid Gemini API Key");
+      return;
+    }
+    saveGeminiApiKey(inlineKey.trim());
+    toast.success("Gemini API Key saved! Connecting counselor…");
+    setShowKeyConfig(false);
+  };
+
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
     if (!text || loading) return;
+
+    // Check if key is present
+    const currentKey = getGeminiApiKey();
+    if (!currentKey) {
+      setShowKeyConfig(true);
+      toast.warning("Please configure your Gemini API Key first.");
+      return;
+    }
 
     const userMsg: Message = {
       id: `u_${Date.now()}`,
@@ -83,12 +109,15 @@ export function AiCounselorWidget() {
       ]);
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : "Failed to connect to AI Counselor.";
+      if (errorMsg.includes("GEMINI_API_KEY")) {
+        setShowKeyConfig(true);
+      }
       setMessages(prev => [
         ...prev,
         {
           id: `err_${Date.now()}`,
           role: "model",
-          text: `⚠️ Counselor unavailable: ${errorMsg}. If GEMINI_API_KEY is not configured yet, you can add it in the user settings menu (top right).`,
+          text: `⚠️ Counselor note: ${errorMsg}. Please enter your key in the box above to continue.`,
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
@@ -143,6 +172,17 @@ export function AiCounselorWidget() {
             </div>
             <div className="flex items-center gap-1">
               <button
+                onClick={() => setShowKeyConfig(!showKeyConfig)}
+                className={`rounded-md p-1.5 transition-colors ${
+                  showKeyConfig || !getGeminiApiKey()
+                    ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+                title="Configure Gemini API Key"
+              >
+                <Key className="size-3.5" />
+              </button>
+              <button
                 onClick={() => setMessages([messages[0]!])}
                 className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                 title="Reset conversation"
@@ -158,6 +198,39 @@ export function AiCounselorWidget() {
               </button>
             </div>
           </div>
+
+          {/* Quick inline key config if missing or toggled */}
+          {showKeyConfig && (
+            <div className="border-b border-border bg-amber-500/10 p-3 text-xs animate-in slide-in-from-top-2">
+              <div className="flex items-center justify-between font-bold text-ink">
+                <span className="flex items-center gap-1.5">
+                  <Key className="size-3.5 text-amber-600" /> Enter Gemini API Key
+                </span>
+                <button
+                  onClick={() => setShowKeyConfig(false)}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+              <p className="mt-1 text-[11px] text-muted-foreground leading-snug">
+                Paste your Google Gemini API key (e.g. <code>AIzaSy...</code>) to activate this counselor immediately:
+              </p>
+              <form onSubmit={handleSaveKey} className="mt-2 flex gap-1.5">
+                <input
+                  type="password"
+                  value={inlineKey}
+                  onChange={e => setInlineKey(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="flex-1 rounded border border-border bg-card px-2.5 py-1 text-xs outline-none focus:border-primary"
+                  autoFocus
+                />
+                <Button type="submit" size="sm" className="h-7 px-3 text-xs shrink-0">
+                  <Check className="size-3 mr-1" /> Save
+                </Button>
+              </form>
+            </div>
+          )}
 
           {/* University context selector */}
           <div className="border-b border-border/60 bg-muted/20 px-3 py-2 flex items-center gap-2 text-xs">

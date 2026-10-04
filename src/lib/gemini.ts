@@ -13,18 +13,42 @@ export type GeminiEvaluation = {
 
 // Returns stored or environment GEMINI_API_KEY
 export function getGeminiApiKey(): string {
+  // 1. Check local storage override first
   if (typeof window !== "undefined") {
-    const userStored = localStorage.getItem("univero-gemini-key");
-    if (userStored && userStored.trim()) return userStored.trim();
+    try {
+      const userStored = localStorage.getItem("univero-gemini-key");
+      if (userStored && userStored.trim()) return userStored.trim();
+    } catch {}
+  }
+
+  // 2. Check process.env (injected by Vite define at build time)
+  try {
+    // @ts-expect-error injected by Vite define
+    if (typeof process !== "undefined" && process?.env?.GEMINI_API_KEY) {
+      // @ts-expect-error injected by Vite define
+      return process.env.GEMINI_API_KEY;
+    }
+    // @ts-expect-error injected by Vite define
+    if (typeof process !== "undefined" && process?.env?.VITE_GEMINI_API_KEY) {
+      // @ts-expect-error injected by Vite define
+      return process.env.VITE_GEMINI_API_KEY;
+    }
+  } catch {}
+
+  // 3. Check import.meta.env
+  try {
     // @ts-expect-error Vite env
-    if (typeof import.meta !== "undefined" && import.meta.env?.VITE_GEMINI_API_KEY) {
+    if (typeof import.meta !== "undefined" && import.meta?.env?.VITE_GEMINI_API_KEY) {
       // @ts-expect-error Vite env
       return import.meta.env.VITE_GEMINI_API_KEY;
     }
-  }
-  if (typeof process !== "undefined" && process.env) {
-    return process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || "";
-  }
+    // @ts-expect-error Vite env
+    if (typeof import.meta !== "undefined" && import.meta?.env?.GEMINI_API_KEY) {
+      // @ts-expect-error Vite env
+      return import.meta.env.GEMINI_API_KEY;
+    }
+  } catch {}
+
   return "";
 }
 
